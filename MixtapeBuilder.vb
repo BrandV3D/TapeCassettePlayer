@@ -23,6 +23,15 @@ Public Class MixtapeBuilder
     Private Const TargetChannels As Integer = 2
     Private Const Mp3BitRate As Integer = 192000
 
+    ' OffsetSampleProvider.Take rounds a TimeSpan down to a sample count internally, so a
+    ' requested-vs-actually-written segment length can differ by a handful of ticks. That leaves
+    ' "remaining" a hair above zero instead of landing exactly on it - and Take treats that
+    ' near-zero remainder as "no limit set" rather than "stop almost immediately", so the next
+    ' segment gets written in full instead of trimmed to a sliver. Stopping once under a second
+    ' remains sidesteps that edge case entirely; losing under a second off a 60/90-minute tape is
+    ' not worth a segment for anyway.
+    Private Shared ReadOnly MinWorthwhileRemainder As TimeSpan = TimeSpan.FromSeconds(1)
+
     Public Shared ReadOnly SixtyMinutes As TimeSpan = TimeSpan.FromMinutes(60)
     Public Shared ReadOnly NinetyMinutes As TimeSpan = TimeSpan.FromMinutes(90)
 
@@ -86,7 +95,7 @@ Public Class MixtapeBuilder
 
             Using combinedWriter As New WaveFileWriter(combinedWavPath, targetFormat)
                 For i = 0 To songPaths.Count - 1
-                    If remaining <= TimeSpan.Zero Then Exit For
+                    If remaining <= MinWorthwhileRemainder Then Exit For
 
                     Dim segmentPath = Path.Combine(tempDir, $"segment{i}.wav")
                     WriteSongSegment(songPaths(i), segmentPath, remaining)

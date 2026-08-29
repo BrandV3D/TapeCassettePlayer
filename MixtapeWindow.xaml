@@ -49,6 +49,6 @@
             <Button x:Name="Build90Button" Content="🎵 Build 90-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
         </StackPanel>
 
-        <TextBlock x:Name="StatusText" Grid.Row="5" Foreground="#FFAAAAAA" Margin="2" TextWrapping="Wrap" Text="Add 10-12 songs, optionally label your mixtape, then build a 60- or 90-minute tape."/>
+        <TextBlock x:Name="StatusText" Grid.Row="5" Foreground="#FFAAAAAA" Margin="2" TextWrapping="Wrap" Text="Add up to 90 minutes of songs (10-12 recommended), optionally label your mixtape, then build a 60- or 90-minute tape."/>
     </Grid>
 </Window>

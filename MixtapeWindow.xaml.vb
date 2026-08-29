@@ -112,12 +112,16 @@ Class MixtapeWindow
     End Sub
 
     ''' <summary>Appends each new file to the list, in order, skipping duplicates already
-    ''' present and stopping once <see cref="MaxSongs"/> is reached; reports how many were
-    ''' skipped for either reason.</summary>
+    ''' present, stopping once <see cref="MaxSongs"/> is reached, and refusing anything that
+    ''' would push the running total past <see cref="MixtapeBuilder.NinetyMinutes"/> - the
+    ''' biggest tape this deck makes, so the list can never grow into something no build could
+    ''' ever fit. Pops up a playful heads-up if that 90-minute cap actually turned something away.</summary>
     Private Sub AddSongs(paths As IEnumerable(Of String))
         Dim added = 0
         Dim skippedDuplicate = 0
         Dim skippedCap = 0
+        Dim skippedFull = 0
+        Dim runningTotal = CurrentTotalDuration()
 
         For Each path In paths
             If songPaths.Contains(path, StringComparer.OrdinalIgnoreCase) Then
@@ -125,8 +129,14 @@ Class MixtapeWindow
             ElseIf songPaths.Count >= MaxSongs Then
                 skippedCap += 1
             Else
-                songPaths.Add(path)
-                added += 1
+                Dim projectedTotal = runningTotal + If(TryGetDuration(path), TimeSpan.Zero)
+                If projectedTotal > MixtapeBuilder.NinetyMinutes Then
+                    skippedFull += 1
+                Else
+                    songPaths.Add(path)
+                    runningTotal = projectedTotal
+                    added += 1
+                End If
             End If
         Next
 
@@ -135,9 +145,22 @@ Class MixtapeWindow
         Dim notes As New List(Of String)
         If skippedDuplicate > 0 Then notes.Add($"{skippedDuplicate} already in the list")
         If skippedCap > 0 Then notes.Add($"{skippedCap} skipped (12-song limit reached)")
+        If skippedFull > 0 Then notes.Add($"{skippedFull} skipped (tape's full at 90 min)")
         StatusText.Text = If(notes.Count > 0,
             $"Added {added} song(s). " & String.Join("; ", notes) & ".",
             $"Added {added} song(s).")
+
+        If skippedFull > 0 Then ShowTapeFullMessage(skippedFull)
+    End Sub
+
+    ''' <summary>The fun version of "your selection is too long": a playful heads-up instead of a
+    ''' dry validation error, shown whenever adding songs actually hit the 90-minute hard cap.</summary>
+    Private Sub ShowTapeFullMessage(skippedCount As Integer)
+        Dim songWord = If(skippedCount = 1, "song", "songs")
+        MessageBox.Show(Me,
+            $"Whoa, hold the tape! 🎉📼 Adding {skippedCount} more {songWord} would run right off the end of the reel." & vbCrLf & vbCrLf &
+            "This mixtape's maxed out at 90 minutes - the biggest tape this deck makes. Save this batch and start a B-side! 🔁",
+            "Tape's Full!", MessageBoxButton.OK, MessageBoxImage.Information)
     End Sub
 
     Private Sub MoveUpButton_Click(sender As Object, e As RoutedEventArgs)
@@ -194,20 +217,45 @@ Class MixtapeWindow
         End Try
     End Function
 
-    Private Sub RefreshSummary()
+    Private Function CurrentTotalDuration() As TimeSpan
         Dim total = TimeSpan.Zero
         For Each path In songPaths
             Dim d = TryGetDuration(path)
             If d.HasValue Then total += d.Value
         Next
+        Return total
+    End Function
+
+    ''' <summary>Redraws the running total and its "fuel gauge" color/quip (calm white under 60
+    ''' minutes, amber past it, red once it's brushing the 90-minute hard cap), and enables each
+    ''' Build button only if the current total would actually fit that tape - no more silent
+    ''' trimming, the button just won't let you try.</summary>
+    Private Sub RefreshSummary()
+        Dim total = CurrentTotalDuration()
 
         Dim countNote = If(songPaths.Count < MinRecommendedSongs, " (10-12 recommended)",
                         If(songPaths.Count > MaxSongs, " (over the 12-song limit)", ""))
-        SummaryText.Text = $"{songPaths.Count} song(s) selected{countNote} — total {total:hh\:mm\:ss}"
 
-        Dim canBuild = songPaths.Count > 0 AndAlso Not isBuilding
-        Build60Button.IsEnabled = canBuild
-        Build90Button.IsEnabled = canBuild
+        Dim capacityNote As String
+        Dim capacityColor As Brush
+        If total >= MixtapeBuilder.NinetyMinutes Then
+            capacityNote = "  🚫 TAPE'S FULL (90-min max)!"
+            capacityColor = Brushes.OrangeRed
+        ElseIf total > MixtapeBuilder.SixtyMinutes Then
+            capacityNote = "  ⏳ Past 60 min — only the 90-min tape fits this now"
+            capacityColor = New SolidColorBrush(Color.FromRgb(224, 160, 48))
+        Else
+            capacityNote = ""
+            capacityColor = Brushes.White
+        End If
+
+        SummaryText.Text = $"{songPaths.Count} song(s) selected{countNote} — total {total:hh\:mm\:ss}{capacityNote}"
+        SummaryText.Foreground = capacityColor
+
+        Dim canBuildAtAll = songPaths.Count > 0 AndAlso Not isBuilding
+        Build60Button.IsEnabled = canBuildAtAll AndAlso total <= MixtapeBuilder.SixtyMinutes
+        Build90Button.IsEnabled = canBuildAtAll AndAlso total <= MixtapeBuilder.NinetyMinutes
+        Build60Button.ToolTip = If(Build60Button.IsEnabled, Nothing, "Your selection runs past 60 minutes — trim it or use the 90-min tape")
     End Sub
 
     ' ---- Building the tape ------------------------------------------------
@@ -220,26 +268,14 @@ Class MixtapeWindow
         BuildMixtape("90minTape.mp3", MixtapeBuilder.NinetyMinutes)
     End Sub
 
-    ''' <summary>Confirms with the user if the songs run longer than the target tape (they'll be
-    ''' cut off), then decodes/concatenates/encodes off the UI thread and reports the result. A
-    ''' blank name overwrites the default <paramref name="defaultFileName"/> tape; a real name is
-    ''' saved as a new file under the Mixtapes folder instead (see MixtapeBuilder.ResolveOutputPath).</summary>
+    ''' <summary>Decodes/concatenates/encodes off the UI thread and reports the result. Build60Button
+    ''' is only enabled when the total already fits 60 minutes (and songs can never be added past
+    ''' the 90-minute hard cap - see AddSongs), so this shouldn't ever need to trim; MixtapeBuilder.Build
+    ''' still clamps to <paramref name="capacity"/> regardless, as a defensive fallback. A blank name
+    ''' overwrites the default <paramref name="defaultFileName"/> tape; a real name is saved as a new
+    ''' file under the Mixtapes folder instead (see MixtapeBuilder.ResolveOutputPath).</summary>
     Private Async Sub BuildMixtape(defaultFileName As String, capacity As TimeSpan)
         If songPaths.Count = 0 OrElse isBuilding Then Return
-
-        Dim total = TimeSpan.Zero
-        For Each path In songPaths
-            Dim d = TryGetDuration(path)
-            If d.HasValue Then total += d.Value
-        Next
-
-        If total > capacity Then
-            Dim result = MessageBox.Show(Me,
-                $"The selected songs run {total:hh\:mm\:ss}, longer than the {capacity.TotalMinutes:0}-minute tape. " &
-                "The mixtape will be cut off once the tape runs out. Continue?",
-                "Mixtape Longer Than Tape", MessageBoxButton.YesNo, MessageBoxImage.Warning)
-            If result <> MessageBoxResult.Yes Then Return
-        End If
 
         Dim outputPath = MixtapeBuilder.ResolveOutputPath(LabelTextBox.Text, defaultFileName)
         Dim displayName = Path.GetFileName(outputPath)

@@ -5,6 +5,7 @@
     <TargetFramework>net10.0-windows</TargetFramework>
     <RootNamespace>Tape_Player</RootNamespace>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>TapeCassette.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -81,6 +82,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="TapeCassette.ico" />
     <Resource Include="ABC.png" />
     <Resource Include="BackgroundCircleCovers.png" />
     <Resource Include="BlockM2.png" />
