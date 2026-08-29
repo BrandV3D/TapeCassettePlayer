@@ -1,0 +1,18 @@
+# Build artifacts
+bin/
+obj/
+.vs/
+publish/
+
+# Raw/unused media exports (not referenced by the project, not needed to build)
+*_150s*.mp4
+BoxVid.mp4
+BottomMp4.mp4
+TopMp4.mp4
+Underbackground
+OrignalBackgroundEdit
+*.psd
+
+# Large audio source files
+12-California Love (Remix).flac
+CaliLove.wav
