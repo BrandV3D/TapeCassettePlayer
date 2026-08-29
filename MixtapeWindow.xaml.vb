@@ -24,13 +24,15 @@ Class MixtapeWindow
 
     Private Const DefaultFontOption As String = "(Default)"
 
-    ' Windows/Office-bundled fonts that read as handwritten or script-style; filtered down at
-    ' startup to whichever of these are actually installed, so the picker never offers a font
-    ' that would silently fall back to a substitute.
-    Private ReadOnly CandidateScriptFonts As String() = {
+    ' Windows/Office-bundled fonts with personality - handwritten/script styles plus a few fun
+    ' decorative/display ones - for labeling a mixtape. Filtered down at startup to whichever are
+    ' actually installed, so the picker never offers a font that would silently fall back to a
+    ' substitute. "Ink Free" ships with core Windows 10/11 itself; the rest usually come with Office.
+    Private ReadOnly CandidateLabelFonts As String() = {
         "Segoe Script", "Segoe Print", "Monotype Corsiva", "Lucida Handwriting",
         "Bradley Hand ITC", "Kristen ITC", "Freestyle Script", "French Script MT",
-        "Brush Script MT", "Vivaldi", "Vladimir Script", "Rage Italic", "Comic Sans MS"
+        "Brush Script MT", "Vivaldi", "Vladimir Script", "Rage Italic", "Comic Sans MS",
+        "Ink Free", "Chiller", "Broadway", "Jokerman", "Papyrus"
     }
 
     Private ReadOnly songPaths As New List(Of String)
@@ -56,15 +58,15 @@ Class MixtapeWindow
 
     ' ---- Label + handwritten-font preview ---------------------------------
 
-    ''' <summary>Offers "(Default)" plus every candidate script font that's actually installed on
-    ''' this machine (Segoe Script/Print always are; the rest usually come with Office).</summary>
+    ''' <summary>Offers "(Default)" plus every candidate label font that's actually installed on
+    ''' this machine (Segoe Script/Print/Ink Free always are; the rest usually come with Office).</summary>
     Private Sub PopulateFontCombo()
         Dim installed = New HashSet(Of String)(
             Fonts.SystemFontFamilies.Select(Function(f) f.Source),
             StringComparer.OrdinalIgnoreCase)
 
         LabelFontCombo.Items.Add(DefaultFontOption)
-        For Each candidate In CandidateScriptFonts
+        For Each candidate In CandidateLabelFonts
             If installed.Contains(candidate) Then LabelFontCombo.Items.Add(candidate)
         Next
         LabelFontCombo.SelectedIndex = 0
