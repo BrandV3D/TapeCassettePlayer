@@ -4,20 +4,30 @@ Imports System.Text
 Imports NAudio.Wave
 Imports NAudio.Wave.SampleProviders
 
-''' <summary>Builds a single mixtape MP3 by concatenating songs in order: each one is decoded,
+''' <summary>Builds a single mixtape by concatenating songs in order: each one is decoded,
 ''' resampled/up-mixed to a shared 44.1kHz 16-bit stereo format, and trimmed to what's left of
 ''' the tape, then the resulting WAV segments are spliced together at the byte level and the
-''' whole thing is encoded to MP3. Sticks entirely to NAudio's own built-in provider/writer
-''' classes (WdlResamplingSampleProvider, MonoToStereoSampleProvider, OffsetSampleProvider,
-''' WaveFileWriter/WaveFileReader, MediaFoundationEncoder) rather than implementing
-''' ISampleProvider/IWaveProvider directly: in this NAudio version those interfaces read into a
-''' Span(Of T), which Visual Basic cannot declare in a member signature.
+''' whole thing is saved as MP3, FLAC, or WAV per <see cref="MixtapeFormat"/>. Sticks entirely to
+''' NAudio's own built-in provider/writer classes (WdlResamplingSampleProvider,
+''' MonoToStereoSampleProvider, OffsetSampleProvider, WaveFileWriter/WaveFileReader,
+''' MediaFoundationEncoder) rather than implementing ISampleProvider/IWaveProvider directly: in
+''' this NAudio version those interfaces read into a Span(Of T), which Visual Basic cannot
+''' declare in a member signature.
 '''
-''' Also hand-writes a minimal ID3v2.3 tag (Title + a custom TXXX:LabelFont frame) onto the
-''' finished MP3 so a mixtape's label — and the handwritten-style font it was labeled in — travel
-''' with the file itself rather than living only in its filename. ID3v2 tags are designed to be
-''' prepended, so this never touches the encoded audio bytes.</summary>
+''' Also hand-writes a minimal ID3v2.3 tag (Title + a custom TXXX:LabelFont frame) onto an MP3
+''' output so a mixtape's label — and the handwritten-style font it was labeled in — travel with
+''' the file itself rather than living only in its filename. ID3v2 tags are designed to be
+''' prepended, so this never touches the encoded audio bytes. FLAC/WAV output isn't tagged this
+''' way (ID3v2 isn't native to either format, and prepending it to FLAC specifically breaks strict
+''' decoders that require the file to start with FLAC's own magic bytes); their label still lives
+''' in the filename.</summary>
 Public Class MixtapeBuilder
+
+    Public Enum MixtapeFormat
+        Mp3
+        Flac
+        Wav
+    End Enum
 
     Private Const TargetSampleRate As Integer = 44100
     Private Const TargetChannels As Integer = 2
@@ -49,23 +59,37 @@ Public Class MixtapeBuilder
         Return dir
     End Function
 
-    ''' <summary>Resolves where a mixtape should be written. A blank <paramref name="mixtapeName"/>
-    ''' reuses <paramref name="defaultFileName"/> in the app's base directory — the classic 60/90-
-    ''' minute "blank tape" that gets re-recorded over each time. A real name is sanitized into a
-    ''' filename and saved as a new, distinct file under the Mixtapes folder, numbered (2), (3)...
-    ''' if that name's already taken, so a named mixtape is never silently overwritten.</summary>
-    Public Shared Function ResolveOutputPath(mixtapeName As String, defaultFileName As String) As String
+    ''' <summary>The file extension (with leading dot) a mixtape in this format is saved with.</summary>
+    Public Shared Function ExtensionFor(format As MixtapeFormat) As String
+        Select Case format
+            Case MixtapeFormat.Wav : Return ".wav"
+            Case MixtapeFormat.Flac : Return ".flac"
+            Case Else : Return ".mp3"
+        End Select
+    End Function
+
+    ''' <summary>Resolves where a mixtape should be written, with the extension matching
+    ''' <paramref name="format"/>. A blank <paramref name="mixtapeName"/> reuses
+    ''' <paramref name="defaultBaseName"/> (no extension) in the app's base directory — the
+    ''' classic 60/90-minute "blank tape" that gets re-recorded over each time (per format: e.g.
+    ''' "60minTape.mp3" and "60minTape.wav" coexist independently rather than overwriting each
+    ''' other). A real name is sanitized into a filename and saved as a new, distinct file under
+    ''' the Mixtapes folder, numbered (2), (3)... if that name (in that format) is already taken,
+    ''' so a named mixtape is never silently overwritten.</summary>
+    Public Shared Function ResolveOutputPath(mixtapeName As String, defaultBaseName As String, format As MixtapeFormat) As String
+        Dim extension = ExtensionFor(format)
+
         If String.IsNullOrWhiteSpace(mixtapeName) Then
-            Return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, defaultFileName)
+            Return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, defaultBaseName & extension)
         End If
 
         Dim sanitized = SanitizeFileName(mixtapeName)
         Dim dir = GetMixtapesDirectory()
-        Dim candidate = Path.Combine(dir, sanitized & ".mp3")
+        Dim candidate = Path.Combine(dir, sanitized & extension)
         Dim suffix = 1
         While File.Exists(candidate)
             suffix += 1
-            candidate = Path.Combine(dir, $"{sanitized} ({suffix}).mp3")
+            candidate = Path.Combine(dir, $"{sanitized} ({suffix}){extension}")
         End While
         Return candidate
     End Function
@@ -78,14 +102,15 @@ Public Class MixtapeBuilder
         Return If(String.IsNullOrWhiteSpace(cleaned), "Mixtape", cleaned)
     End Function
 
-    ''' <summary>Concatenates <paramref name="songPaths"/> in order into a single MP3 at
-    ''' <paramref name="outputPath"/>, trimmed to <paramref name="capacity"/>. Works entirely
-    ''' through temp files and swaps the finished MP3 into place at the end, so a failed build
-    ''' never leaves a half-written tape behind. If <paramref name="label"/> is given, it's
-    ''' embedded as the file's ID3 title (and <paramref name="fontFamily"/>, if given, as the
-    ''' font that label should be displayed in) once the swap is done.</summary>
+    ''' <summary>Concatenates <paramref name="songPaths"/> in order into a single file at
+    ''' <paramref name="outputPath"/> in the given <paramref name="format"/>, trimmed to
+    ''' <paramref name="capacity"/>. Works entirely through temp files and swaps the finished file
+    ''' into place at the end, so a failed build never leaves a half-written tape behind. For MP3
+    ''' output, if <paramref name="label"/> is given, it's embedded as the file's ID3 title (and
+    ''' <paramref name="fontFamily"/>, if given, as the font that label should be displayed in)
+    ''' once the swap is done; FLAC/WAV output isn't tagged this way (see class remarks).</summary>
     Public Shared Sub Build(songPaths As IReadOnlyList(Of String), outputPath As String, capacity As TimeSpan,
-                             Optional label As String = Nothing, Optional fontFamily As String = Nothing)
+                             format As MixtapeFormat, Optional label As String = Nothing, Optional fontFamily As String = Nothing)
         Dim tempDir = Path.Combine(Path.GetTempPath(), "TapePlayerMixtape_" & Guid.NewGuid().ToString("N"))
         Directory.CreateDirectory(tempDir)
         Try
@@ -107,15 +132,31 @@ Public Class MixtapeBuilder
                 Next
             End Using
 
-            Dim tempMp3Path = Path.Combine(tempDir, "combined.mp3")
-            Using combinedReader As New WaveFileReader(combinedWavPath)
-                MediaFoundationEncoder.EncodeToMp3(combinedReader, tempMp3Path, Mp3BitRate)
-            End Using
+            Select Case format
+                Case MixtapeFormat.Wav
+                    If File.Exists(outputPath) Then File.Delete(outputPath)
+                    File.Move(combinedWavPath, outputPath)
 
-            If File.Exists(outputPath) Then File.Delete(outputPath)
-            File.Move(tempMp3Path, outputPath)
+                Case MixtapeFormat.Flac
+                    Dim tempFlacPath = Path.Combine(tempDir, "combined.flac")
+                    Using combinedReader As New WaveFileReader(combinedWavPath)
+                        MediaFoundationEncoder.EncodeToFlac(combinedReader, tempFlacPath)
+                    End Using
 
-            If Not String.IsNullOrWhiteSpace(label) Then WriteLabel(outputPath, label, fontFamily)
+                    If File.Exists(outputPath) Then File.Delete(outputPath)
+                    File.Move(tempFlacPath, outputPath)
+
+                Case Else ' Mp3
+                    Dim tempMp3Path = Path.Combine(tempDir, "combined.mp3")
+                    Using combinedReader As New WaveFileReader(combinedWavPath)
+                        MediaFoundationEncoder.EncodeToMp3(combinedReader, tempMp3Path, Mp3BitRate)
+                    End Using
+
+                    If File.Exists(outputPath) Then File.Delete(outputPath)
+                    File.Move(tempMp3Path, outputPath)
+
+                    If Not String.IsNullOrWhiteSpace(label) Then WriteLabel(outputPath, label, fontFamily)
+            End Select
         Finally
             Try
                 Directory.Delete(tempDir, recursive:=True)

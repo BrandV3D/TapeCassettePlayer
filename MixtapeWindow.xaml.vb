@@ -53,8 +53,26 @@ Class MixtapeWindow
         AddHandler LabelTextBox.TextChanged, AddressOf UpdateLabelPreview
         AddHandler LabelFontCombo.SelectionChanged, AddressOf UpdateLabelPreview
         PopulateFontCombo()
+        PopulateFormatCombo()
         RefreshSummary()
     End Sub
+
+    ''' <summary>MP3 (compressed, the classic mixtape format), FLAC (compressed but lossless), or
+    ''' WAV (uncompressed, lossless).</summary>
+    Private Sub PopulateFormatCombo()
+        FormatCombo.Items.Add("MP3")
+        FormatCombo.Items.Add("FLAC")
+        FormatCombo.Items.Add("WAV")
+        FormatCombo.SelectedIndex = 0
+    End Sub
+
+    Private Function SelectedFormat() As MixtapeBuilder.MixtapeFormat
+        Select Case CStr(FormatCombo.SelectedItem)
+            Case "FLAC" : Return MixtapeBuilder.MixtapeFormat.Flac
+            Case "WAV" : Return MixtapeBuilder.MixtapeFormat.Wav
+            Case Else : Return MixtapeBuilder.MixtapeFormat.Mp3
+        End Select
+    End Function
 
     ' ---- Label + handwritten-font preview ---------------------------------
 
@@ -263,23 +281,26 @@ Class MixtapeWindow
     ' ---- Building the tape ------------------------------------------------
 
     Private Sub Build60Button_Click(sender As Object, e As RoutedEventArgs)
-        BuildMixtape("60minTape.mp3", MixtapeBuilder.SixtyMinutes)
+        BuildMixtape("60minTape", MixtapeBuilder.SixtyMinutes)
     End Sub
 
     Private Sub Build90Button_Click(sender As Object, e As RoutedEventArgs)
-        BuildMixtape("90minTape.mp3", MixtapeBuilder.NinetyMinutes)
+        BuildMixtape("90minTape", MixtapeBuilder.NinetyMinutes)
     End Sub
 
-    ''' <summary>Decodes/concatenates/encodes off the UI thread and reports the result. Build60Button
-    ''' is only enabled when the total already fits 60 minutes (and songs can never be added past
-    ''' the 90-minute hard cap - see AddSongs), so this shouldn't ever need to trim; MixtapeBuilder.Build
-    ''' still clamps to <paramref name="capacity"/> regardless, as a defensive fallback. A blank name
-    ''' overwrites the default <paramref name="defaultFileName"/> tape; a real name is saved as a new
-    ''' file under the Mixtapes folder instead (see MixtapeBuilder.ResolveOutputPath).</summary>
-    Private Async Sub BuildMixtape(defaultFileName As String, capacity As TimeSpan)
+    ''' <summary>Decodes/concatenates/encodes off the UI thread and reports the result, in
+    ''' whichever format is selected in FormatCombo. Build60Button is only enabled when the total
+    ''' already fits 60 minutes (and songs can never be added past the 90-minute hard cap - see
+    ''' AddSongs), so this shouldn't ever need to trim; MixtapeBuilder.Build still clamps to
+    ''' <paramref name="capacity"/> regardless, as a defensive fallback. A blank name overwrites
+    ''' the default <paramref name="defaultBaseName"/> tape (per format - see
+    ''' MixtapeBuilder.ResolveOutputPath); a real name is saved as a new file under the Mixtapes
+    ''' folder instead.</summary>
+    Private Async Sub BuildMixtape(defaultBaseName As String, capacity As TimeSpan)
         If songPaths.Count = 0 OrElse isBuilding Then Return
 
-        Dim outputPath = MixtapeBuilder.ResolveOutputPath(LabelTextBox.Text, defaultFileName)
+        Dim format = SelectedFormat()
+        Dim outputPath = MixtapeBuilder.ResolveOutputPath(LabelTextBox.Text, defaultBaseName, format)
         Dim displayName = Path.GetFileName(outputPath)
         Dim paths = songPaths.ToList()
         Dim label = LabelTextBox.Text
@@ -290,7 +311,7 @@ Class MixtapeWindow
         StatusText.Text = $"Building {displayName}..."
 
         Try
-            Await Task.Run(Sub() MixtapeBuilder.Build(paths, outputPath, capacity, label, fontFamily))
+            Await Task.Run(Sub() MixtapeBuilder.Build(paths, outputPath, capacity, format, label, fontFamily))
             StatusText.Text = $"Saved {displayName} ({MixtapeBuilder.GetDuration(outputPath):hh\:mm\:ss})."
             RaiseEvent MixtapeBuilt(outputPath)
         Catch ex As Exception

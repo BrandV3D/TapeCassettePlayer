@@ -23,18 +23,22 @@ Class LoadMixtapeWindow
         RefreshList()
     End Sub
 
-    ''' <summary>Scans for every mixtape on disk — named ones under the Mixtapes subfolder, plus
-    ''' the two default quick tapes at the app's base directory if present — newest first.</summary>
+    Private Shared ReadOnly MixtapeExtensions As String() = {"*.mp3", "*.flac", "*.wav"}
+
+    ''' <summary>Scans for every mixtape on disk, in any supported format — named ones under the
+    ''' Mixtapes subfolder, plus the default quick tapes (60minTape/90minTape, per format - see
+    ''' MixtapeBuilder.ResolveOutputPath) at the app's base directory if present — newest first.</summary>
     Private Sub RefreshList()
         MixtapesList.Items.Clear()
 
         Dim baseDir = AppDomain.CurrentDomain.BaseDirectory
-        Dim defaultTapes = {"60minTape.mp3", "90minTape.mp3"}.
+        Dim defaultTapes = {"60minTape", "90minTape"}.
+            SelectMany(Function(baseName) MixtapeExtensions.Select(Function(ext) baseName & ext.TrimStart("*"c))).
             Select(Function(name) Path.Combine(baseDir, name)).
             Where(Function(p) File.Exists(p))
 
         Dim mixtapesDir = MixtapeBuilder.GetMixtapesDirectory()
-        Dim namedTapes = Directory.GetFiles(mixtapesDir, "*.mp3")
+        Dim namedTapes = MixtapeExtensions.SelectMany(Function(ext) Directory.GetFiles(mixtapesDir, ext))
 
         Dim allTapes = defaultTapes.Concat(namedTapes).
             OrderByDescending(Function(p) File.GetLastWriteTime(p)).
@@ -71,8 +75,9 @@ Class LoadMixtapeWindow
             .FontSize = 16,
             .VerticalAlignment = VerticalAlignment.Center
         })
+        Dim formatTag = Path.GetExtension(tapePath).TrimStart("."c).ToUpperInvariant()
         panel.Children.Add(New TextBlock With {
-            .Text = $"  {durationText}  —  {modified:g}",
+            .Text = $"  {durationText}  —  {formatTag}  —  {modified:g}",
             .FontSize = 11,
             .Foreground = Brushes.Gray,
             .VerticalAlignment = VerticalAlignment.Center

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d"
-        Title="Make Mixtape" Width="480" Height="470" MinWidth="380" MinHeight="360" ResizeMode="CanResize"
+        Title="Make Mixtape" Width="560" Height="470" MinWidth="460" MinHeight="360" ResizeMode="CanResize"
         Background="#FF1E1E1E" WindowStartupLocation="CenterOwner">
     <Grid Margin="8">
         <Grid.RowDefinitions>
@@ -45,6 +45,8 @@
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Center" Margin="0,6,0,4">
+            <TextBlock Text="Format:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <ComboBox x:Name="FormatCombo" Width="70" Margin="0,0,10,0" ToolTip="MP3 (compressed), FLAC (compressed, lossless), or WAV (uncompressed, lossless)"/>
             <Button x:Name="Build60Button" Content="🎵 Build 60-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
             <Button x:Name="Build90Button" Content="🎵 Build 90-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
         </StackPanel>
