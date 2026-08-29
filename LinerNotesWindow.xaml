@@ -1,0 +1,33 @@
+<UserControl x:Class="LinerNotesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d">
+    <!-- Purely cosmetic: styled like the liner-notes insert tucked inside a cassette's J-card. -->
+    <Grid Background="{DynamicResource Bg1Brush}">
+        <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="8">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="{DynamicResource PanelGradTopColor}" Offset="0"/>
+                    <GradientStop Color="{DynamicResource PanelGradBottomColor}" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel Margin="18" VerticalAlignment="Center">
+                <TextBlock Text="LINER NOTES" FontFamily="pack://application:,,,/Fonts/#Chakra Petch" FontWeight="Bold"
+                           FontSize="16" Foreground="{DynamicResource AccentGradientBrush}" Margin="0,0,0,10"/>
+                <TextBlock TextWrapping="Wrap" FontStyle="Italic" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}"
+                           Text="&quot;A mixtape is a love letter with a runtime.&quot;" Margin="0,0,0,14"/>
+                <StackPanel>
+                    <TextBlock FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Text="A1  Opening Theme            3:14"/>
+                    <TextBlock FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Text="A2  Rewind &amp; Try Again       2:47" Margin="0,4,0,0"/>
+                    <TextBlock FontFamily="Consolas" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Text="A3  Side B, See You There    4:02" Margin="0,4,0,0"/>
+                </StackPanel>
+                <TextBlock Text="Recorded on low-noise stock. Home taping is loving it."
+                           FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" Opacity="0.8"
+                           TextWrapping="Wrap" Margin="0,16,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

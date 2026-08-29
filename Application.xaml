@@ -14,38 +14,14 @@
 
         <!-- Tape-deck button skin: dark brushed-plastic buttons with a warm amber accent (like a
              deck's indicator LEDs) on hover/press, applied to every Button app-wide since there's
-             no reason any window should keep the default flat system-gray look on this dark skin. -->
-        <SolidColorBrush x:Key="ButtonBorderBrush" Color="#FF141414"/>
-        <SolidColorBrush x:Key="ButtonAccentBrush" Color="#FFE0A030"/>
-        <SolidColorBrush x:Key="ButtonTextBrush" Color="#FFF0F0F0"/>
-        <SolidColorBrush x:Key="ButtonDisabledTextBrush" Color="#FF7A7A7A"/>
-
-        <LinearGradientBrush x:Key="ButtonNormalBrush" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#FF5C5C5C" Offset="0"/>
-            <GradientStop Color="#FF3A3A3A" Offset="0.5"/>
-            <GradientStop Color="#FF2A2A2A" Offset="1"/>
-        </LinearGradientBrush>
-
-        <LinearGradientBrush x:Key="ButtonHoverBrush" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#FF6E6E6E" Offset="0"/>
-            <GradientStop Color="#FF464646" Offset="0.5"/>
-            <GradientStop Color="#FF343434" Offset="1"/>
-        </LinearGradientBrush>
-
-        <LinearGradientBrush x:Key="ButtonPressedBrush" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#FF242424" Offset="0"/>
-            <GradientStop Color="#FF1A1A1A" Offset="1"/>
-        </LinearGradientBrush>
-
-        <LinearGradientBrush x:Key="ButtonDisabledBrush" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#FF383838" Offset="0"/>
-            <GradientStop Color="#FF2A2A2A" Offset="1"/>
-        </LinearGradientBrush>
-
+             no reason any window should keep the default flat system-gray look on this dark skin.
+             The actual brushes come from whichever Themes/*.xaml ResourceDictionary ThemeManager
+             has merged in (see ThemeManager.vb) - DynamicResource here (not StaticResource) is what
+             lets switching themes re-skin every button live. -->
         <Style TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource ButtonNormalBrush}"/>
-            <Setter Property="Foreground" Value="{StaticResource ButtonTextBrush}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonNormalBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="6,3"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -77,12 +53,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource ButtonHoverBrush}"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource ButtonAccentBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource ButtonAccentBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource ButtonPressedBrush}"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource ButtonAccentBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource ButtonAccentBrush}"/>
                                 <Setter TargetName="ButtonBorder" Property="Effect">
                                     <Setter.Value>
                                         <DropShadowEffect Color="Black" Direction="270" ShadowDepth="0.5" BlurRadius="2" Opacity="0.3"/>
@@ -95,12 +71,12 @@
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource ButtonAccentBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource ButtonAccentBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource ButtonDisabledBrush}"/>
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonDisabledBrush}"/>
                                 <Setter TargetName="ButtonBorder" Property="Effect" Value="{x:Null}"/>
-                                <Setter Property="Foreground" Value="{StaticResource ButtonDisabledTextBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledTextBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

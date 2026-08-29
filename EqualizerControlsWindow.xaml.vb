@@ -52,9 +52,10 @@ Class EqualizerControlsWindow
             Dim freq = engine.Equalizer.GetCentreFrequency(i)
 
             Dim valueLabel As New TextBlock With {
-                .Text = "0", .Foreground = Brushes.White, .FontSize = 10,
+                .Text = "0", .FontSize = 10,
                 .HorizontalAlignment = HorizontalAlignment.Center
             }
+            valueLabel.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush")
             Dim slider As New Slider With {
                 .Orientation = Orientation.Vertical,
                 .Minimum = -12, .Maximum = 12, .Value = 0,
@@ -63,9 +64,10 @@ Class EqualizerControlsWindow
                 .Margin = New Thickness(6, 4, 6, 4)
             }
             Dim freqLabel As New TextBlock With {
-                .Text = FormatFrequency(freq), .Foreground = Brushes.White, .FontSize = 10,
+                .Text = FormatFrequency(freq), .FontSize = 10,
                 .HorizontalAlignment = HorizontalAlignment.Center
             }
+            freqLabel.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush")
 
             Dim index = i
             AddHandler slider.ValueChanged, Sub(sender As Object, e As RoutedPropertyChangedEventArgs(Of Double))

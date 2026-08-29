@@ -5,19 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d">
-    <Grid Background="#FF1E1E1E">
-    <Border BorderBrush="#FF3A3A3A" BorderThickness="1" CornerRadius="4" Margin="8">
+    <Grid Background="{DynamicResource Bg1Brush}">
+    <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="8">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#FF121018" Offset="0"/>
-                <GradientStop Color="#FF06060A" Offset="1"/>
+                <GradientStop Color="{DynamicResource PanelGradTopColor}" Offset="0"/>
+                <GradientStop Color="{DynamicResource PanelGradBottomColor}" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
         <Grid x:Name="EqRoot" ClipToBounds="True">
             <Canvas x:Name="GridLinesCanvas"/>
             <Canvas x:Name="BarsCanvas">
                 <Canvas.Effect>
-                    <DropShadowEffect x:Name="GlowEffect" Color="#FF9B4DFF" BlurRadius="18" ShadowDepth="0" Opacity="0.55"/>
+                    <DropShadowEffect x:Name="GlowEffect" Color="{DynamicResource AccentGlowColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.55"/>
                 </Canvas.Effect>
             </Canvas>
         </Grid>

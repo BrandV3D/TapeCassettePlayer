@@ -81,6 +81,19 @@ Class Cassette
     Private ReadOnly equalizerWindow As New EqualizerWindow()
     Private ReadOnly visualizerWindow As New VisualizerWindow()
     Private ReadOnly equalizerControlsWindow As New EqualizerControlsWindow(engine)
+    Private ReadOnly themeWindow As New ThemeWindow()
+
+    ' Purely cosmetic panels - no playback logic, just decoration the user can freely dock, float,
+    ' or leave out of their own layout (see MainWindow.xaml's LayoutAnchorable CanClose="True" for
+    ' these, unlike the seven functional panels above).
+    Private ReadOnly linerNotesWindow As New LinerNotesWindow()
+    Private ReadOnly vuMetersWindow As New VuMetersWindow()
+    Private ReadOnly stickersWindow As New StickersWindow()
+    Private ReadOnly staticNoiseWindow As New StaticNoiseWindow()
+    Private ReadOnly tapeCounterWindow As New TapeCounterWindow()
+    Private ReadOnly concertPosterWindow As New ConcertPosterWindow()
+    Private ReadOnly retroAdWindow As New RetroAdWindow()
+    Private ReadOnly creditsWindow As New CreditsWindow()
 
     ''' <summary>Exposes playlistWindow's ListBox under the name every existing playlist call site
     ''' already uses, so PlaySong/LoadPlaylist/etc. didn't need to change when the ListBox moved
@@ -186,6 +199,60 @@ Class Cassette
     Public ReadOnly Property EqualizerControlsView As EqualizerControlsWindow
         Get
             Return equalizerControlsWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property ThemeView As ThemeWindow
+        Get
+            Return themeWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property LinerNotesView As LinerNotesWindow
+        Get
+            Return linerNotesWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property VuMetersView As VuMetersWindow
+        Get
+            Return vuMetersWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property StickersView As StickersWindow
+        Get
+            Return stickersWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property StaticNoiseView As StaticNoiseWindow
+        Get
+            Return staticNoiseWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property TapeCounterView As TapeCounterWindow
+        Get
+            Return tapeCounterWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property ConcertPosterView As ConcertPosterWindow
+        Get
+            Return concertPosterWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property RetroAdView As RetroAdWindow
+        Get
+            Return retroAdWindow
+        End Get
+    End Property
+
+    Public ReadOnly Property CreditsView As CreditsWindow
+        Get
+            Return creditsWindow
         End Get
     End Property
 

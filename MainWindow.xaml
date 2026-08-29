@@ -7,10 +7,10 @@
         xmlns:xcad="https://github.com/Dirkster99/AvalonDock"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
-        Title="Tape Cassette Player" Height="820" Width="1360" MinWidth="640" MinHeight="420"
+        Title="Tape Cassette Player" Height="820" Width="1660" MinWidth="640" MinHeight="420"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" ResizeMode="CanResize" AllowsTransparency="False"
-        Background="#FF141414"
+        Background="{DynamicResource Bg0Brush}"
         Closing="MainWindow_Closing">
 
     <shell:WindowChrome.WindowChrome>
@@ -18,13 +18,6 @@
     </shell:WindowChrome.WindowChrome>
 
     <Window.Resources>
-
-        <!-- The wordmark's cyan -> violet -> magenta thread, matching the Equalizer/Visualizer glow. -->
-        <LinearGradientBrush x:Key="TapeGradient" StartPoint="0,0" EndPoint="1,0">
-            <GradientStop Color="#FF00E5FF" Offset="0"/>
-            <GradientStop Color="#FFB721FF" Offset="0.55"/>
-            <GradientStop Color="#FFFF2D95" Offset="1"/>
-        </LinearGradientBrush>
 
         <!-- Slim caption buttons (minimize/maximize/close) - deliberately NOT the app-wide gradient
              Button style from Application.xaml, since that's sized for the tape-deck transport
@@ -35,7 +28,7 @@
             <Setter Property="Height" Value="40"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="#FFC8C8CE"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="shell:WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
             <Setter Property="Template">
@@ -86,7 +79,7 @@
         <!-- Custom title bar. WindowChrome treats everything in this row as the caption area
              (drag to move, double-click to maximize/restore) except the buttons, which opt out
              via IsHitTestVisibleInChrome above. -->
-        <Border Grid.Row="0" Background="#FF0E0E12" BorderBrush="#FF2C2C34" BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Background="{DynamicResource Bg0Brush}" BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -99,17 +92,17 @@
                     <Viewbox Width="20" Height="20" Margin="0,0,10,0">
                         <Canvas Width="40" Height="40">
                             <Ellipse Width="34" Height="34" Canvas.Left="3" Canvas.Top="3"
-                                      Stroke="{StaticResource TapeGradient}" StrokeThickness="2.4"/>
+                                      Stroke="{DynamicResource AccentGradientBrush}" StrokeThickness="2.4"/>
                             <Ellipse Width="14" Height="14" Canvas.Left="13" Canvas.Top="13"
-                                      Fill="#FF0E0E12" Stroke="#FF8B8B96" StrokeThickness="2"/>
-                            <Ellipse Width="4" Height="4" Canvas.Left="18" Canvas.Top="18" Fill="#FF8B8B96"/>
+                                      Fill="{DynamicResource Bg0Brush}" Stroke="{DynamicResource TextSecondaryBrush}" StrokeThickness="2"/>
+                            <Ellipse Width="4" Height="4" Canvas.Left="18" Canvas.Top="18" Fill="{DynamicResource TextSecondaryBrush}"/>
                         </Canvas>
                     </Viewbox>
                     <TextBlock Text="TAPE CASSETTE PLAYER" FontFamily="pack://application:,,,/Fonts/#Chakra Petch"
                                FontWeight="Bold" FontSize="17" VerticalAlignment="Center"
-                               Foreground="{StaticResource TapeGradient}">
+                               Foreground="{DynamicResource AccentGradientBrush}">
                         <TextBlock.Effect>
-                            <DropShadowEffect Color="#FF9B4DFF" BlurRadius="12" ShadowDepth="0" Opacity="0.45"/>
+                            <DropShadowEffect Color="{DynamicResource AccentGlowColor}" BlurRadius="12" ShadowDepth="0" Opacity="0.45"/>
                         </TextBlock.Effect>
                     </TextBlock>
                 </StackPanel>
@@ -180,6 +173,38 @@
                             <xcad:LayoutAnchorablePane DockHeight="280">
                                 <xcad:LayoutAnchorable x:Name="VisualizerPane" Title="Visualizer" CanClose="False" CanFloat="True"
                                                         FloatingWidth="460" FloatingHeight="220"/>
+                            </xcad:LayoutAnchorablePane>
+                        </xcad:LayoutPanel>
+
+                        <!-- Extras bay: Theme + the eight purely-cosmetic panels, grouped into three
+                             tabbed panes so they don't crowd out the functional columns by default.
+                             Every one of them is CanClose="True" (unlike the seven panels above) -
+                             they're optional decoration, meant to be dragged out, resized, tabbed
+                             differently, or closed entirely as the user builds their own layout. -->
+                        <xcad:LayoutPanel Orientation="Vertical" DockWidth="300">
+                            <xcad:LayoutAnchorablePane DockHeight="210">
+                                <xcad:LayoutAnchorable x:Name="ThemePane" Title="Theme" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="360" FloatingHeight="260"/>
+                                <xcad:LayoutAnchorable x:Name="CreditsPane" Title="Credits" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="320" FloatingHeight="260"/>
+                                <xcad:LayoutAnchorable x:Name="LinerNotesPane" Title="Liner Notes" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="320" FloatingHeight="300"/>
+                            </xcad:LayoutAnchorablePane>
+                            <xcad:LayoutAnchorablePane DockHeight="200">
+                                <xcad:LayoutAnchorable x:Name="VuMetersPane" Title="VU Meters" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="360" FloatingHeight="220"/>
+                                <xcad:LayoutAnchorable x:Name="TapeCounterPane" Title="Tape Counter" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="320" FloatingHeight="220"/>
+                            </xcad:LayoutAnchorablePane>
+                            <xcad:LayoutAnchorablePane DockHeight="210">
+                                <xcad:LayoutAnchorable x:Name="StickersPane" Title="Stickers" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="320" FloatingHeight="260"/>
+                                <xcad:LayoutAnchorable x:Name="ConcertPosterPane" Title="Live on Tape" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="300" FloatingHeight="320"/>
+                                <xcad:LayoutAnchorable x:Name="RetroAdPane" Title="Retro Ad" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="340" FloatingHeight="320"/>
+                                <xcad:LayoutAnchorable x:Name="StaticNoisePane" Title="Static" CanClose="True" CanFloat="True"
+                                                        FloatingWidth="360" FloatingHeight="220"/>
                             </xcad:LayoutAnchorablePane>
                         </xcad:LayoutPanel>
 

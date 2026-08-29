@@ -37,6 +37,7 @@ Class VisualizerWindow
         phase(2) = rng.NextDouble() * Math.PI * 2
 
         AddHandler renderTimer.Tick, AddressOf RenderTimer_Tick
+        AddHandler ThemeManager.ThemeChanged, Sub() BuildGridLines()
         AddHandler Me.SizeChanged, Sub() BuildGridLines()
         AddHandler Me.Loaded, Sub()
                                    BuildGridLines()
@@ -57,8 +58,10 @@ Class VisualizerWindow
         Dim h = ScopeRoot.ActualHeight
         If w <= 0 OrElse h <= 0 Then Return
 
-        Dim lineBrush As New SolidColorBrush(Color.FromArgb(18, 255, 255, 255))
-        lineBrush.Freeze()
+        ' Rebuilt from scratch every call (SizeChanged/Loaded/theme change all call this), so reading
+        ' the color directly - rather than a live resource binding - is enough to stay current;
+        ' GridLinesCanvas.Children.Clear() above already threw away the previous set of lines.
+        Dim lineBrush As New SolidColorBrush(CType(Application.Current.Resources("GridLineColor"), Color))
 
         Const hLines As Integer = 4
         For i = 1 To hLines
@@ -76,9 +79,8 @@ Class VisualizerWindow
             GridLinesCanvas.Children.Add(line)
         Next
 
-        Dim centerBrush As New SolidColorBrush(Color.FromArgb(35, 255, 255, 255))
-        centerBrush.Freeze()
-        Dim centerLine As New Rectangle With {.Width = w, .Height = 1, .Fill = centerBrush}
+        Dim centerLine As New Rectangle With {.Width = w, .Height = 1, .Opacity = 0.3}
+        centerLine.SetResourceReference(Shape.FillProperty, "TextSecondaryBrush")
         Canvas.SetTop(centerLine, h / 2)
         GridLinesCanvas.Children.Add(centerLine)
     End Sub

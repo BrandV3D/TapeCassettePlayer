@@ -1,0 +1,34 @@
+<UserControl x:Class="ConcertPosterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d">
+    <!-- Purely cosmetic - a gig-poster treatment of "on tape" instead of "on stage". -->
+    <Grid Background="{DynamicResource Bg1Brush}">
+        <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="8">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="{DynamicResource PanelGradTopColor}" Offset="0"/>
+                    <GradientStop Color="{DynamicResource PanelGradBottomColor}" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="LIVE" FontFamily="pack://application:,,,/Fonts/#Chakra Petch" FontWeight="Bold"
+                           FontSize="40" Foreground="{DynamicResource AccentGradientBrush}" HorizontalAlignment="Center">
+                    <TextBlock.Effect>
+                        <DropShadowEffect Color="{DynamicResource AccentGlowColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.5"/>
+                    </TextBlock.Effect>
+                </TextBlock>
+                <TextBlock Text="ON TAPE" FontFamily="pack://application:,,,/Fonts/#Chakra Petch" FontWeight="Bold"
+                           FontSize="22" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,-4,0,0"/>
+                <Rectangle Height="1" Width="140" Fill="{DynamicResource HairlineBrush}" Margin="0,12,0,10"/>
+                <TextBlock Text="ONE NIGHT. NINETY MINUTES." FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                <TextBlock Text="DOORS AT SIDE A" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"
+                           HorizontalAlignment="Center" Margin="0,2,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

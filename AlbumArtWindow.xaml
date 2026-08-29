@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d">
-    <Grid Background="#FF1E1E1E">
-        <Border BorderBrush="#FF3A3A3A" BorderThickness="1" Background="#FF141414" Margin="8">
+    <Grid Background="{DynamicResource Bg1Brush}">
+        <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" Background="{DynamicResource Bg0Brush}" Margin="8">
             <Image x:Name="ArtImage" Stretch="Uniform" Margin="4"/>
         </Border>
     </Grid>

@@ -1,0 +1,115 @@
+<UserControl x:Class="ThemeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="SwatchButton" TargetType="RadioButton">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Frame" Width="120" Height="86" CornerRadius="6" BorderThickness="2"
+                                BorderBrush="{DynamicResource HairlineBrush}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <!-- Swatch preview: chassis color with a 3-stop accent bar, so each
+                                     option previews both halves of the skin (background + accent). -->
+                                <Border Grid.Row="0" Margin="6,6,6,0" CornerRadius="4" Background="{TemplateBinding Background}">
+                                    <Rectangle Height="10" VerticalAlignment="Bottom" Margin="10,10,10,14" RadiusX="2" RadiusY="2"
+                                               Fill="{TemplateBinding Tag}"/>
+                                </Border>
+                                <TextBlock x:Name="Label" Grid.Row="1" HorizontalAlignment="Center" Margin="0,4,0,6"
+                                           FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}"
+                                           Text="{TemplateBinding Content}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource AccentStartBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource TextSecondaryBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Grid Background="{DynamicResource Bg1Brush}">
+        <StackPanel Margin="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="THEME" FontWeight="Bold" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+            <WrapPanel HorizontalAlignment="Center" Width="270">
+                <RadioButton x:Name="DarkSwatch" GroupName="Theme" Style="{StaticResource SwatchButton}" Content="Dark"
+                             Background="#FF1E1E1E">
+                    <RadioButton.Tag>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF00E5FF" Offset="0"/>
+                            <GradientStop Color="#FFB721FF" Offset="0.55"/>
+                            <GradientStop Color="#FFFF2D95" Offset="1"/>
+                        </LinearGradientBrush>
+                    </RadioButton.Tag>
+                </RadioButton>
+                <RadioButton x:Name="LightSwatch" GroupName="Theme" Style="{StaticResource SwatchButton}" Content="Light"
+                             Background="#FFFAFAFC">
+                    <RadioButton.Tag>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF0091B3" Offset="0"/>
+                            <GradientStop Color="#FF7A1FCC" Offset="0.55"/>
+                            <GradientStop Color="#FFD41E76" Offset="1"/>
+                        </LinearGradientBrush>
+                    </RadioButton.Tag>
+                </RadioButton>
+                <RadioButton x:Name="BlueSwatch" GroupName="Theme" Style="{StaticResource SwatchButton}" Content="Blue"
+                             Background="#FF10182A">
+                    <RadioButton.Tag>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF00C2FF" Offset="0"/>
+                            <GradientStop Color="#FF2E6BFF" Offset="0.55"/>
+                            <GradientStop Color="#FF6A3EFF" Offset="1"/>
+                        </LinearGradientBrush>
+                    </RadioButton.Tag>
+                </RadioButton>
+                <RadioButton x:Name="GreenSwatch" GroupName="Theme" Style="{StaticResource SwatchButton}" Content="Green"
+                             Background="#FF101E14">
+                    <RadioButton.Tag>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FF00FFA3" Offset="0"/>
+                            <GradientStop Color="#FF4CD964" Offset="0.55"/>
+                            <GradientStop Color="#FFC6FF3E" Offset="1"/>
+                        </LinearGradientBrush>
+                    </RadioButton.Tag>
+                </RadioButton>
+                <RadioButton x:Name="GraffitiSwatch" GroupName="Theme" Style="{StaticResource SwatchButton}" Content="Graffiti"
+                             Background="#FF211D18">
+                    <RadioButton.Tag>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                            <GradientStop Color="#FFFF2E88" Offset="0"/>
+                            <GradientStop Color="#FFFF7A1A" Offset="0.55"/>
+                            <GradientStop Color="#FFC6FF00" Offset="1"/>
+                        </LinearGradientBrush>
+                    </RadioButton.Tag>
+                </RadioButton>
+            </WrapPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
+                <Button x:Name="SaveButton" Content="💾 Save Theme" Padding="8,4" Margin="4" FontSize="12"
+                        ToolTip="Persist the currently applied theme so it's still active next launch"/>
+                <Button x:Name="LoadButton" Content="↺ Load Saved" Padding="8,4" Margin="4" FontSize="12"
+                        ToolTip="Reload whatever theme was last saved, discarding any unsaved preview"/>
+            </StackPanel>
+
+            <TextBlock x:Name="StatusText" Text="" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,10,0,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

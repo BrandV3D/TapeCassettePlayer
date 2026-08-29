@@ -36,19 +36,19 @@ Class EqualizerWindow
     Private targetEnergy As Double
 
     Private ReadOnly barBrush As LinearGradientBrush
-    Private ReadOnly peakBrush As SolidColorBrush = New SolidColorBrush(Colors.White)
-    Private ReadOnly gridLineBrush As New SolidColorBrush(Color.FromArgb(20, 255, 255, 255))
+    Private ReadOnly barStart As New GradientStop(Colors.Transparent, 0)
+    Private ReadOnly barMid As New GradientStop(Colors.Transparent, 0.55)
+    Private ReadOnly barEnd As New GradientStop(Colors.Transparent, 1)
+    Private ReadOnly gridLineBrush As New SolidColorBrush()
 
     Public Sub New()
         InitializeComponent()
 
         barBrush = New LinearGradientBrush() With {.StartPoint = New Point(0, 1), .EndPoint = New Point(0, 0)}
-        barBrush.GradientStops.Add(New GradientStop(Color.FromRgb(&H00, &HE5, &HFF), 0))
-        barBrush.GradientStops.Add(New GradientStop(Color.FromRgb(&HB7, &H21, &HFF), 0.55))
-        barBrush.GradientStops.Add(New GradientStop(Color.FromRgb(&HFF, &H2D, &H95), 1))
-        barBrush.Freeze()
-        peakBrush.Freeze()
-        gridLineBrush.Freeze()
+        barBrush.GradientStops.Add(barStart)
+        barBrush.GradientStops.Add(barMid)
+        barBrush.GradientStops.Add(barEnd)
+        RefreshThemeColors()
 
         For i = 0 To BarCount - 1
             freqA(i) = 0.6 + rng.NextDouble() * 1.4
@@ -59,12 +59,31 @@ Class EqualizerWindow
 
         BuildBars()
         AddHandler renderTimer.Tick, AddressOf RenderTimer_Tick
+        AddHandler ThemeManager.ThemeChanged, AddressOf ThemeManager_ThemeChanged
         AddHandler Me.SizeChanged, Sub() BuildGridLines()
         AddHandler Me.Loaded, Sub()
                                    BuildGridLines()
                                    renderTimer.Start()
                                End Sub
-        AddHandler Me.Unloaded, Sub() renderTimer.Stop()
+        AddHandler Me.Unloaded, Sub()
+                                     renderTimer.Stop()
+                                     RemoveHandler ThemeManager.ThemeChanged, AddressOf ThemeManager_ThemeChanged
+                                 End Sub
+    End Sub
+
+    ''' <summary>GradientStop/SolidColorBrush are Freezable, not FrameworkElement, so they have no
+    ''' SetResourceReference - unlike a control's own Foreground/Fill, these have to be refreshed by
+    ''' hand whenever ThemeManager swaps the theme dictionary.</summary>
+    Private Sub ThemeManager_ThemeChanged(sender As Object, e As EventArgs)
+        RefreshThemeColors()
+    End Sub
+
+    Private Sub RefreshThemeColors()
+        Dim resources = Application.Current.Resources
+        barStart.Color = CType(resources("AccentStartColor"), Color)
+        barMid.Color = CType(resources("AccentMidColor"), Color)
+        barEnd.Color = CType(resources("AccentEndColor"), Color)
+        gridLineBrush.Color = CType(resources("GridLineColor"), Color)
     End Sub
 
     ''' <summary>Tells the equalizer whether audio is actually playing. Bars ease their energy
@@ -87,9 +106,12 @@ Class EqualizerWindow
                 .RadiusX = 2, .RadiusY = 2
             }
             Dim peak As New Rectangle With {
-                .Fill = peakBrush,
                 .Height = 2
             }
+            ' Peak caps read as a bright highlight against the panel in every theme - Dark bows out
+            ' since its peaks are near-white already; TextPrimaryBrush keeps the same contrast logic
+            ' the rest of the panel's text uses instead of a hardcoded White that would vanish on Light.
+            peak.SetResourceReference(Shape.FillProperty, "TextPrimaryBrush")
             BarsCanvas.Children.Add(reflection)
             BarsCanvas.Children.Add(bar)
             BarsCanvas.Children.Add(peak)

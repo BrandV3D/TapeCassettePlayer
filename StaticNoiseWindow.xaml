@@ -1,0 +1,35 @@
+<UserControl x:Class="StaticNoiseWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d">
+    <!-- Purely cosmetic - a CRT-static / tape-hiss mood panel: scanlines plus flickering title text. -->
+    <Grid Background="{DynamicResource Bg1Brush}">
+        <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="8" ClipToBounds="True">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="{DynamicResource PanelGradTopColor}" Offset="0"/>
+                    <GradientStop Color="{DynamicResource PanelGradBottomColor}" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <!-- Static scanline texture, built in code-behind so it always fills whatever size
+                     this panel ends up at (docked, floated, resized). -->
+                <Canvas x:Name="ScanlinesCanvas" SizeChanged="ScanlinesCanvas_SizeChanged"/>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock x:Name="GlitchText" Text="NO SIGNAL" FontFamily="pack://application:,,,/Fonts/#Chakra Petch"
+                               FontWeight="Bold" FontSize="26" Foreground="{DynamicResource AccentGradientBrush}"
+                               HorizontalAlignment="Center">
+                        <TextBlock.Effect>
+                            <DropShadowEffect Color="{DynamicResource AccentGlowColor}" BlurRadius="16" ShadowDepth="0" Opacity="0.5"/>
+                        </TextBlock.Effect>
+                    </TextBlock>
+                    <TextBlock Text="PLEASE INSERT CASSETTE" FontFamily="Consolas" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"
+                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

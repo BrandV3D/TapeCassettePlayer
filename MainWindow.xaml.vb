@@ -21,6 +21,16 @@ Class MainWindow
         EqualizerControlsPane.Content = cassette.EqualizerControlsView
         PlaylistPane.Content = cassette.PlaylistView
 
+        ThemePane.Content = cassette.ThemeView
+        CreditsPane.Content = cassette.CreditsView
+        LinerNotesPane.Content = cassette.LinerNotesView
+        VuMetersPane.Content = cassette.VuMetersView
+        TapeCounterPane.Content = cassette.TapeCounterView
+        StickersPane.Content = cassette.StickersView
+        ConcertPosterPane.Content = cassette.ConcertPosterView
+        RetroAdPane.Content = cassette.RetroAdView
+        StaticNoisePane.Content = cassette.StaticNoiseView
+
         AddHandler Me.StateChanged, AddressOf MainWindow_StateChanged
     End Sub
 

@@ -9,7 +9,7 @@
         <Style x:Key="EqButton" TargetType="Button">
             <Setter Property="Background" Value="#FF2A2A32"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF3A3A3A"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,3"/>
             <Setter Property="Margin" Value="3"/>
@@ -18,7 +18,7 @@
         </Style>
         <Style x:Key="EqToggle" TargetType="ToggleButton">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#FF3A3A3A"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource HairlineBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="10,4"/>
             <Setter Property="Margin" Value="3"/>
@@ -28,18 +28,18 @@
             <Setter Property="Background" Value="#FF2A2A32"/>
             <Style.Triggers>
                 <Trigger Property="IsChecked" Value="True">
-                    <Setter Property="Background" Value="#FF00E5FF"/>
+                    <Setter Property="Background" Value="{DynamicResource AccentStartBrush}"/>
                     <Setter Property="Foreground" Value="Black"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <Grid Background="#FF1E1E1E">
-    <Border BorderBrush="#FF3A3A3A" BorderThickness="1" CornerRadius="4" Margin="8">
+    <Grid Background="{DynamicResource Bg1Brush}">
+    <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="8">
         <Border.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#FF121018" Offset="0"/>
-                <GradientStop Color="#FF06060A" Offset="1"/>
+                <GradientStop Color="{DynamicResource PanelGradTopColor}" Offset="0"/>
+                <GradientStop Color="{DynamicResource PanelGradBottomColor}" Offset="1"/>
             </LinearGradientBrush>
         </Border.Background>
         <DockPanel Margin="10">
@@ -52,10 +52,7 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <StackPanel Margin="10,0" HorizontalAlignment="Center">
                         <Grid Width="56" Height="56">
-                            <Ellipse x:Name="PreampKnobEllipse" Width="52" Height="52" StrokeThickness="2" Cursor="Hand">
-                                <Ellipse.Stroke>
-                                    <SolidColorBrush Color="#FF3A3A3A"/>
-                                </Ellipse.Stroke>
+                            <Ellipse x:Name="PreampKnobEllipse" Width="52" Height="52" StrokeThickness="2" Cursor="Hand" Stroke="{DynamicResource HairlineBrush}">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
                                         <GradientStop Color="#FF2A2A32" Offset="0"/>
@@ -63,23 +60,20 @@
                                     </RadialGradientBrush>
                                 </Ellipse.Fill>
                                 <Ellipse.Effect>
-                                    <DropShadowEffect Color="#FF00E5FF" BlurRadius="10" ShadowDepth="0" Opacity="0.45"/>
+                                    <DropShadowEffect Color="{DynamicResource AccentStartColor}" BlurRadius="10" ShadowDepth="0" Opacity="0.45"/>
                                 </Ellipse.Effect>
                             </Ellipse>
-                            <Rectangle Width="3" Height="20" Fill="#FF00E5FF" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,6,0,0" RadiusX="1.5" RadiusY="1.5" RenderTransformOrigin="0.5,1">
+                            <Rectangle Width="3" Height="20" Fill="{DynamicResource AccentStartBrush}" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,6,0,0" RadiusX="1.5" RadiusY="1.5" RenderTransformOrigin="0.5,1">
                                 <Rectangle.RenderTransform>
                                     <RotateTransform x:Name="PreampKnobRotate" Angle="0"/>
                                 </Rectangle.RenderTransform>
                             </Rectangle>
                         </Grid>
-                        <TextBlock Text="Preamp" Foreground="White" FontSize="10" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="Preamp" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="10" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                     <StackPanel Margin="10,0" HorizontalAlignment="Center">
                         <Grid Width="56" Height="56">
-                            <Ellipse x:Name="BassBoostKnobEllipse" Width="52" Height="52" StrokeThickness="2" Cursor="Hand">
-                                <Ellipse.Stroke>
-                                    <SolidColorBrush Color="#FF3A3A3A"/>
-                                </Ellipse.Stroke>
+                            <Ellipse x:Name="BassBoostKnobEllipse" Width="52" Height="52" StrokeThickness="2" Cursor="Hand" Stroke="{DynamicResource HairlineBrush}">
                                 <Ellipse.Fill>
                                     <RadialGradientBrush>
                                         <GradientStop Color="#FF2A2A32" Offset="0"/>
@@ -87,16 +81,16 @@
                                     </RadialGradientBrush>
                                 </Ellipse.Fill>
                                 <Ellipse.Effect>
-                                    <DropShadowEffect Color="#FFFF2D95" BlurRadius="10" ShadowDepth="0" Opacity="0.45"/>
+                                    <DropShadowEffect Color="{DynamicResource AccentEndColor}" BlurRadius="10" ShadowDepth="0" Opacity="0.45"/>
                                 </Ellipse.Effect>
                             </Ellipse>
-                            <Rectangle Width="3" Height="20" Fill="#FFFF2D95" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,6,0,0" RadiusX="1.5" RadiusY="1.5" RenderTransformOrigin="0.5,1">
+                            <Rectangle Width="3" Height="20" Fill="{DynamicResource AccentEndBrush}" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,6,0,0" RadiusX="1.5" RadiusY="1.5" RenderTransformOrigin="0.5,1">
                                 <Rectangle.RenderTransform>
                                     <RotateTransform x:Name="BassBoostKnobRotate" Angle="-135"/>
                                 </Rectangle.RenderTransform>
                             </Rectangle>
                         </Grid>
-                        <TextBlock Text="Bass Boost" Foreground="White" FontSize="10" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                        <TextBlock Text="Bass Boost" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="10" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </DockPanel>

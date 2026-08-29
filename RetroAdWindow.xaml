@@ -1,0 +1,35 @@
+<UserControl x:Class="RetroAdWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d">
+    <!-- Purely cosmetic - a parody vintage catalog ad, serif type standing in deliberate contrast
+         to the app's technical Chakra Petch wordmark. -->
+    <Grid Background="{DynamicResource Bg1Brush}">
+        <Border BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1" CornerRadius="4" Margin="8">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                    <GradientStop Color="{DynamicResource PanelGradTopColor}" Offset="0"/>
+                    <GradientStop Color="{DynamicResource PanelGradBottomColor}" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <StackPanel Margin="18" VerticalAlignment="Center">
+                <TextBlock Text="NOW IN STEREO!" FontFamily="Georgia" FontWeight="Bold" FontSize="20"
+                           Foreground="{DynamicResource AmberBrush}" TextWrapping="Wrap"/>
+                <TextBlock FontFamily="Georgia" FontStyle="Italic" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
+                           Foreground="{DynamicResource TextPrimaryBrush}"
+                           Text="Introducing the amazing Tape Cassette Player - bring the whole family's music into one room, instantly!"/>
+                <TextBlock FontFamily="Georgia" FontSize="11" TextWrapping="Wrap" Margin="0,10,0,0"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Text="Featuring Dolby-quality equalization*, a full-motion animated tape deck, and mixtapes you can actually keep."/>
+                <TextBlock FontFamily="Georgia" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}" Opacity="0.7"
+                           Margin="0,10,0,0" Text="*Not actually Dolby. Batteries not included. Void where prohibited."/>
+                <Border BorderBrush="{DynamicResource AmberBrush}" BorderThickness="1.5" CornerRadius="3" Padding="10,4" Margin="0,12,0,0" HorizontalAlignment="Left">
+                    <TextBlock FontFamily="Georgia" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AmberBrush}" Text="Only $19.95!"/>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

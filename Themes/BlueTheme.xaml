@@ -1,0 +1,56 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Blue - a deep-navy deck with an azure -> royal-blue -> indigo accent thread instead of the
+         cyan/violet/magenta one. The amber LED accent stays put across every theme on purpose - it
+         reads as a fixed hardware detail (like a real indicator light) rather than part of the skin. -->
+
+    <SolidColorBrush x:Key="Bg0Brush" Color="#FF0A0E1A"/>
+    <SolidColorBrush x:Key="Bg1Brush" Color="#FF10182A"/>
+    <Color x:Key="PanelGradTopColor">#FF13203C</Color>
+    <Color x:Key="PanelGradBottomColor">#FF060A14</Color>
+    <SolidColorBrush x:Key="HairlineBrush" Color="#FF2A3A5A"/>
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FFE8F0FF"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF8FA8CC"/>
+    <Color x:Key="GridLineColor">#1E7FBFFF</Color>
+
+    <Color x:Key="AccentStartColor">#FF00C2FF</Color>
+    <Color x:Key="AccentMidColor">#FF2E6BFF</Color>
+    <Color x:Key="AccentEndColor">#FF6A3EFF</Color>
+    <Color x:Key="AccentGlowColor">#FF2E6BFF</Color>
+    <SolidColorBrush x:Key="AccentStartBrush" Color="{StaticResource AccentStartColor}"/>
+    <SolidColorBrush x:Key="AccentMidBrush" Color="{StaticResource AccentMidColor}"/>
+    <SolidColorBrush x:Key="AccentEndBrush" Color="{StaticResource AccentEndColor}"/>
+    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="{StaticResource AccentStartColor}" Offset="0"/>
+        <GradientStop Color="{StaticResource AccentMidColor}" Offset="0.55"/>
+        <GradientStop Color="{StaticResource AccentEndColor}" Offset="1"/>
+    </LinearGradientBrush>
+
+    <Color x:Key="AmberColor">#FFE0A030</Color>
+    <SolidColorBrush x:Key="AmberBrush" Color="{StaticResource AmberColor}"/>
+
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="#FF060A14"/>
+    <SolidColorBrush x:Key="ButtonAccentBrush" Color="{StaticResource AccentStartColor}"/>
+    <SolidColorBrush x:Key="ButtonTextBrush" Color="#FFE8F0FF"/>
+    <SolidColorBrush x:Key="ButtonDisabledTextBrush" Color="#FF56668A"/>
+    <LinearGradientBrush x:Key="ButtonNormalBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF33456E" Offset="0"/>
+        <GradientStop Color="#FF223252" Offset="0.5"/>
+        <GradientStop Color="#FF17223A" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="ButtonHoverBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF3E5484" Offset="0"/>
+        <GradientStop Color="#FF2A3E64" Offset="0.5"/>
+        <GradientStop Color="#FF1D2C48" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="ButtonPressedBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF141E34" Offset="0"/>
+        <GradientStop Color="#FF0C1424" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="ButtonDisabledBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FF20304E" Offset="0"/>
+        <GradientStop Color="#FF17223A" Offset="1"/>
+    </LinearGradientBrush>
+
+</ResourceDictionary>

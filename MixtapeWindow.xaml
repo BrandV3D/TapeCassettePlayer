@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d"
         Title="Make Mixtape" Width="560" Height="470" MinWidth="460" MinHeight="360" ResizeMode="CanResize"
-        Background="#FF1E1E1E" WindowStartupLocation="CenterOwner">
+        Background="{DynamicResource Bg1Brush}" WindowStartupLocation="CenterOwner">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,16 +26,16 @@
             <Button x:Name="ClearButton" Content="Clear" Padding="6,2" Margin="2" FontSize="11"/>
         </StackPanel>
 
-        <ListBox x:Name="SongsList" Grid.Row="1" Background="#FF1E1E1E" Foreground="White" FontSize="13" BorderThickness="1" BorderBrush="#FF3C3C3C"/>
+        <ListBox x:Name="SongsList" Grid.Row="1" Background="{DynamicResource Bg1Brush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" BorderThickness="1" BorderBrush="{DynamicResource HairlineBrush}"/>
 
-        <TextBlock x:Name="SummaryText" Grid.Row="2" Foreground="White" Margin="2,6" Text="0 song(s) selected — total 00:00:00"/>
+        <TextBlock x:Name="SummaryText" Grid.Row="2" Foreground="{DynamicResource TextPrimaryBrush}" Margin="2,6" Text="0 song(s) selected — total 00:00:00"/>
 
         <StackPanel Grid.Row="3" Margin="2,0,2,2">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Label:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                <TextBlock Text="Label:" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
                 <TextBox x:Name="LabelTextBox" Width="210" Padding="3,2"
                          ToolTip="Optional. Leave blank to overwrite the default 60/90-min tape; type a label to save this as a new, separate mixtape file and embed the label in it."/>
-                <TextBlock Text="Font:" Foreground="White" VerticalAlignment="Center" Margin="10,0,4,0"/>
+                <TextBlock Text="Font:" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="10,0,4,0"/>
                 <ComboBox x:Name="LabelFontCombo" Width="150"/>
             </StackPanel>
             <Border Background="#FFF5E9C8" BorderBrush="#FFB89A5A" BorderThickness="1" CornerRadius="3"
@@ -45,12 +45,12 @@
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Center" Margin="0,6,0,4">
-            <TextBlock Text="Format:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+            <TextBlock Text="Format:" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,4,0"/>
             <ComboBox x:Name="FormatCombo" Width="70" Margin="0,0,10,0" ToolTip="MP3 (compressed), FLAC (compressed, lossless), or WAV (uncompressed, lossless)"/>
             <Button x:Name="Build60Button" Content="🎵 Build 60-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
             <Button x:Name="Build90Button" Content="🎵 Build 90-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
         </StackPanel>
 
-        <TextBlock x:Name="StatusText" Grid.Row="5" Foreground="#FFAAAAAA" Margin="2" TextWrapping="Wrap" Text="Add up to 90 minutes of songs (10-12 recommended), optionally label your mixtape, then build a 60- or 90-minute tape."/>
+        <TextBlock x:Name="StatusText" Grid.Row="5" Foreground="{DynamicResource TextSecondaryBrush}" Margin="2" TextWrapping="Wrap" Text="Add up to 90 minutes of songs (10-12 recommended), optionally label your mixtape, then build a 60- or 90-minute tape."/>
     </Grid>
 </Window>

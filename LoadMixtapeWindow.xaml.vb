@@ -76,12 +76,13 @@ Class LoadMixtapeWindow
             .VerticalAlignment = VerticalAlignment.Center
         })
         Dim formatTag = Path.GetExtension(tapePath).TrimStart("."c).ToUpperInvariant()
-        panel.Children.Add(New TextBlock With {
+        Dim metaText As New TextBlock With {
             .Text = $"  {durationText}  —  {formatTag}  —  {modified:g}",
             .FontSize = 11,
-            .Foreground = Brushes.Gray,
             .VerticalAlignment = VerticalAlignment.Center
-        })
+        }
+        metaText.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondaryBrush")
+        panel.Children.Add(metaText)
         Return panel
     End Function
 

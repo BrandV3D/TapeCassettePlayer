@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d"
         Title="Load Mixtape" Width="440" Height="360" MinWidth="320" MinHeight="240" ResizeMode="CanResize"
-        Background="#FF1E1E1E" WindowStartupLocation="CenterOwner">
+        Background="{DynamicResource Bg1Brush}" WindowStartupLocation="CenterOwner">
     <Grid Margin="8">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,10 +14,10 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Foreground="White" Margin="2,0,2,6" TextWrapping="Wrap"
+        <TextBlock Grid.Row="0" Foreground="{DynamicResource TextPrimaryBrush}" Margin="2,0,2,6" TextWrapping="Wrap"
                    Text="Mixtapes you've built with Make Mixtape. Pick one and press Load to add it to the playlist and start playing."/>
 
-        <ListBox x:Name="MixtapesList" Grid.Row="1" Background="#FF1E1E1E" Foreground="White" FontSize="13" BorderThickness="1" BorderBrush="#FF3C3C3C"/>
+        <ListBox x:Name="MixtapesList" Grid.Row="1" Background="{DynamicResource Bg1Brush}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" BorderThickness="1" BorderBrush="{DynamicResource HairlineBrush}"/>
 
         <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="0,6,0,0">
             <Button x:Name="RefreshButton" Content="Refresh" Padding="8,3" Margin="2"/>

@@ -256,21 +256,21 @@ Class MixtapeWindow
         Dim countNote = If(songPaths.Count < MinRecommendedSongs, " (10-12 recommended)",
                         If(songPaths.Count > MaxSongs, " (over the 12-song limit)", ""))
 
+        ' The two warning colors are fixed regardless of theme (alert colors, not chrome), but the
+        ' normal state must track TextPrimaryBrush - a hardcoded White here would vanish on Light.
         Dim capacityNote As String
-        Dim capacityColor As Brush
         If total >= MixtapeBuilder.NinetyMinutes Then
             capacityNote = "  🚫 TAPE'S FULL (90-min max)!"
-            capacityColor = Brushes.OrangeRed
+            SummaryText.Foreground = Brushes.OrangeRed
         ElseIf total > MixtapeBuilder.SixtyMinutes Then
             capacityNote = "  ⏳ Past 60 min — only the 90-min tape fits this now"
-            capacityColor = New SolidColorBrush(Color.FromRgb(224, 160, 48))
+            SummaryText.Foreground = New SolidColorBrush(Color.FromRgb(224, 160, 48))
         Else
             capacityNote = ""
-            capacityColor = Brushes.White
+            SummaryText.SetResourceReference(TextBlock.ForegroundProperty, "TextPrimaryBrush")
         End If
 
         SummaryText.Text = $"{songPaths.Count} song(s) selected{countNote} — total {total:hh\:mm\:ss}{capacityNote}"
-        SummaryText.Foreground = capacityColor
 
         Dim canBuildAtAll = songPaths.Count > 0 AndAlso Not isBuilding
         Build60Button.IsEnabled = canBuildAtAll AndAlso total <= MixtapeBuilder.SixtyMinutes
