@@ -6,6 +6,7 @@
     <RootNamespace>Tape_Player</RootNamespace>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>TapeCassette.ico</ApplicationIcon>
+    <AppDesignerFolder>My Project</AppDesignerFolder>
   </PropertyGroup>
 
   <ItemGroup>
