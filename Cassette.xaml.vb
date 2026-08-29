@@ -72,6 +72,11 @@ Class Cassette
     Private isMuted As Boolean
     Private volumeBeforeMute As Double = 0.5
 
+    ' True only while paused (via the Pause button) - distinct from stopped: the engine, wheels,
+    ' and stretch/lines/center-window animations are all frozen exactly where they were rather than
+    ' reset, so the same button can resume from here.
+    Private isPaused As Boolean
+
     ' The tape visual (this window), the transport controls, and the playlist are three
     ' independent, freely movable/resizable windows; Cassette owns the other two and holds
     ' all the playback/recording/animation logic for all three.
@@ -146,6 +151,7 @@ Class Cassette
         AddHandler controlsWindow.RewindButton.LostMouseCapture, AddressOf SeekButton_LostMouseCapture
         AddHandler controlsWindow.PreviousButton.Click, AddressOf PreviousButton_Click
         AddHandler controlsWindow.PlayButton.Click, AddressOf PlayButton_Click
+        AddHandler controlsWindow.PauseButton.Click, AddressOf PauseButton_Click
         AddHandler controlsWindow.StopButton.Click, AddressOf StopButton_Click
         AddHandler controlsWindow.NextButton.Click, AddressOf NextButton_Click
         AddHandler controlsWindow.FastForwardButton.PreviewMouseLeftButtonDown, AddressOf FastForwardButton_MouseDown
@@ -491,6 +497,7 @@ Class Cassette
             Return
         End Try
 
+        ResetPauseButtonState()
         songPlaying = filePath
         ResetStretch()
         ResetLines()
@@ -532,6 +539,55 @@ Class Cassette
         PlaySong(songPath)
     End Sub
 
+    Private Sub PauseButton_Click(sender As Object, e As RoutedEventArgs)
+        If Not engine.IsLoaded Then Return
+        If isPaused Then
+            ResumeFromPause()
+        Else
+            PausePlayback()
+        End If
+    End Sub
+
+    ''' <summary>Freezes audio, wheel spin, and the tape-stretch/Lines/CenterWindow_Copy animations
+    ''' exactly where they are (reusing the same FreezeAnimation helper StopWheels already uses for
+    ''' the wheels) - unlike Stop, nothing is reset, so ResumeFromPause can continue from here.</summary>
+    Private Sub PausePlayback()
+        isPaused = True
+        sfx.Play("clunk.wav")
+        positionTimer.Stop()
+        engine.Pause()
+        StopWheels()
+        FreezeAnimation(currentStretchTransform, ScaleTransform.ScaleXProperty)
+        FreezeAnimation(LinesScaleTransform, ScaleTransform.ScaleYProperty)
+        FreezeAnimation(CenterWindowCopyTranslateTransform, TranslateTransform.XProperty)
+        StatusText.Text = "Paused"
+        controlsWindow.PauseButton.Content = "▶"
+        controlsWindow.PauseButton.ToolTip = "Resume"
+    End Sub
+
+    ''' <summary>Resumes exactly where PausePlayback left off - ResumeWheels already knows how to
+    ''' restart the wheel spin and the stretch/Lines/CenterWindow_Copy animations for whatever time
+    ''' remains in the song, continuing from wherever they were frozen.</summary>
+    Private Sub ResumeFromPause()
+        isPaused = False
+        sfx.Play("clunk.wav")
+        engine.Play()
+        ResumeWheels()
+        positionTimer.Start()
+        StatusText.Text = "Playing: " & Path.GetFileName(songPlaying)
+        controlsWindow.PauseButton.Content = "⏸"
+        controlsWindow.PauseButton.ToolTip = "Pause"
+    End Sub
+
+    ''' <summary>Puts the Pause button back to its default "not paused" glyph/tooltip - called
+    ''' whenever playback starts fresh or stops, so it doesn't keep showing "Resume" from a pause
+    ''' that Play/Stop/Next/Previous just overrode.</summary>
+    Private Sub ResetPauseButtonState()
+        isPaused = False
+        controlsWindow.PauseButton.Content = "⏸"
+        controlsWindow.PauseButton.ToolTip = "Pause"
+    End Sub
+
     Private Sub StopButton_Click(sender As Object, e As RoutedEventArgs)
         sfx.Play("release.wav")
         StopPlayback()
@@ -564,6 +620,7 @@ Class Cassette
 
     ''' <summary>Stops playback and freezes the wheels in place (no song loaded).</summary>
     Private Sub StopPlayback()
+        ResetPauseButtonState()
         isSeeking = False
         seekTimer.Stop()
         sfx.StopLoop()
@@ -809,7 +866,13 @@ Class Cassette
         If Not isSeeking Then Return
         isSeeking = False
         seekTimer.Stop()
-        If engine.IsLoaded Then
+        If Not engine.IsLoaded Then Return
+
+        If isPaused Then
+            ' Seeking while paused should land back in the paused state, not silently resume -
+            ' just re-freeze the wheel at its new spot rather than restarting real playback.
+            StopWheels()
+        Else
             engine.Play()
             ResumeWheels()
         End If

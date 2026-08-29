@@ -22,6 +22,10 @@
                         <TextBlock Text="Play" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="PauseButton" Content="⏸" Width="30" ToolTip="Pause"/>
+                        <TextBlock Text="Pause" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
                         <Button x:Name="StopButton" Content="⏹" Width="30"/>
                         <TextBlock Text="Stop" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                     </StackPanel>
@@ -33,6 +37,8 @@
                         <Button x:Name="FastForwardButton" Content="⏩" Width="30"/>
                         <TextBlock Text="Forward" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
                     </StackPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
                     <StackPanel Margin="2" HorizontalAlignment="Center">
                         <Button x:Name="RecordButton" Content="⏺" Width="30"/>
                         <TextBlock Text="Record" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>

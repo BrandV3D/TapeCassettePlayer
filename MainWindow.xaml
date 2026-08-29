@@ -68,6 +68,17 @@
             <Setter Property="SnapsToDevicePixels" Value="True"/>
         </Style>
 
+        <!-- Auto-hidden panel tabs (Theme, Credits, Liner Notes, etc. along the left edge) -
+             AvalonDock's default tab text is a dim gray that's hard to read against the dark skin,
+             so this bumps it to TextPrimaryBrush - the same DynamicResource every other label in
+             the app uses, so it comes out white on the dark/blue/green/graffiti skins and black on
+             Light, and re-colors live if the user switches themes. Foreground is inherited, and the
+             tab's built-in template doesn't override it on the text itself, so a plain Style setter
+             is enough. -->
+        <Style TargetType="{x:Type xcad:LayoutAnchorControl}">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+
     </Window.Resources>
 
     <Grid>
