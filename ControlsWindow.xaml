@@ -46,6 +46,17 @@
                     <Button x:Name="FlipTapeButton" Content="🔃" Width="30" ToolTip="Flip to Side B"/>
                     <TextBlock Text="Flip" FontSize="9" Foreground="White" HorizontalAlignment="Center"/>
                 </StackPanel>
+                <StackPanel Margin="2" HorizontalAlignment="Center">
+                    <Button x:Name="MuteButton" Content="🔊" Width="30" ToolTip="Mute"/>
+                    <TextBlock Text="Mute" FontSize="9" Foreground="White" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                <TextBlock Text="🔈" Foreground="White" VerticalAlignment="Center" Margin="2,0"/>
+                <Slider x:Name="VolumeSlider" Width="140" Minimum="0" Maximum="1" Value="0.5"
+                        VerticalAlignment="Center" TickFrequency="0.1" IsSnapToTickEnabled="False"/>
+                <TextBlock Text="🔊" Foreground="White" VerticalAlignment="Center" Margin="2,0"/>
+                <TextBlock x:Name="VolumeText" Text="50%" Foreground="White" VerticalAlignment="Center" Width="34" Margin="4,0,0,0"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Button x:Name="OpenFileButton" Content="📄 Open File..." Padding="6,2" Margin="2" FontSize="10"/>

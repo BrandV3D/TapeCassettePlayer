@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d"
         Title="Cassette" Height="450" Width="770"
-        WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
+        WindowStartupLocation="Manual" ResizeMode="CanResize"
         Closing="Cassette_Closing" Loaded="Cassette_Loaded">
     <Viewbox Stretch="Uniform">
         <Grid Width="800" Height="450">
@@ -70,7 +70,6 @@
                 </Image.RenderTransform>
             </Image>
 
-            <MediaElement x:Name="AudioPlayer" LoadedBehavior="Manual" Visibility="Collapsed" MediaOpened="AudioPlayer_MediaOpened" MediaEnded="AudioPlayer_MediaEnded" MediaFailed="AudioPlayer_MediaFailed" Grid.ColumnSpan="4" Margin="33,52,-37,-8" Grid.RowSpan="2"/>
             <Image x:Name="Lines_Copy1" Grid.Column="2" Margin="50,77,349,253" Source="/LineTrans.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Opacity="0.85" Grid.Row="1" Grid.ColumnSpan="2">
                 <Image.RenderTransform>
                     <TransformGroup>

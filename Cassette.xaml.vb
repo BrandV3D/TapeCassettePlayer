@@ -8,6 +8,10 @@ Imports NAudio.Wave
 
 Class Cassette
 
+    ' Playback engine (NAudio) - swapped in for MediaElement so the equalizer can actually filter
+    ' the audio in real time; MediaElement has no way to expose samples for that.
+    Private ReadOnly engine As New AudioEngine()
+
     ' Path of the audio file currently loaded/playing (mp3, flac, or wav; ~1 to 9 minutes).
     Private songPlaying As String = String.Empty
 
@@ -64,12 +68,20 @@ Class Cassette
     ' Mechanical deck sound effects (button clunks, eject/insert, rewind/FF motor whir).
     Private ReadOnly sfx As New SfxPlayer()
 
+    ' Volume / Mute: volumeBeforeMute remembers the slider's level so unmuting restores it exactly,
+    ' rather than just leaving the muted 0 in place.
+    Private isMuted As Boolean
+    Private volumeBeforeMute As Double = 0.5
+
     ' The tape visual (this window), the transport controls, and the playlist are three
     ' independent, freely movable/resizable windows; Cassette owns the other two and holds
     ' all the playback/recording/animation logic for all three.
     Private ReadOnly controlsWindow As New ControlsWindow()
     Private ReadOnly playlistWindow As New PlaylistWindow()
     Private ReadOnly albumArtWindow As New AlbumArtWindow()
+    Private ReadOnly equalizerWindow As New EqualizerWindow()
+    Private ReadOnly visualizerWindow As New VisualizerWindow()
+    Private ReadOnly equalizerControlsWindow As New EqualizerControlsWindow(engine)
 
     ''' <summary>Exposes playlistWindow's ListBox under the name every existing playlist call site
     ''' already uses, so PlaySong/LoadPlaylist/etc. didn't need to change when the ListBox moved
@@ -106,6 +118,7 @@ Class Cassette
         currentStretchTransform = StretchScaleTransform
         AddHandler seekTimer.Tick, AddressOf SeekTimer_Tick
         AddHandler positionTimer.Tick, AddressOf PositionTimer_Tick
+        AddHandler engine.PlaybackEnded, AddressOf Engine_PlaybackEnded
         WireControlsWindow()
         LoadPlaylist()
         LoadCassetteImages()
@@ -132,6 +145,9 @@ Class Cassette
         AddHandler controlsWindow.OpenFolderButton.Click, AddressOf OpenFolderButton_Click
         AddHandler controlsWindow.MixtapeButton.Click, AddressOf MixtapeButton_Click
         AddHandler controlsWindow.LoadMixtapeButton.Click, AddressOf LoadMixtapeButton_Click
+        AddHandler controlsWindow.MuteButton.Click, AddressOf MuteButton_Click
+        AddHandler controlsWindow.VolumeSlider.ValueChanged, AddressOf VolumeSlider_ValueChanged
+        engine.Volume = CSng(controlsWindow.VolumeSlider.Value)
     End Sub
 
     ''' The cassette sits still on launch (wheels only start spinning once Play is pressed);
@@ -142,26 +158,58 @@ Class Cassette
         controlsWindow.Owner = Me
         playlistWindow.Owner = Me
         albumArtWindow.Owner = Me
+        equalizerWindow.Owner = Me
+        visualizerWindow.Owner = Me
+        equalizerControlsWindow.Owner = Me
         LayoutCompanionWindows()
         controlsWindow.Show()
         playlistWindow.Show()
         albumArtWindow.Show()
+        equalizerWindow.Show()
+        visualizerWindow.Show()
+        equalizerControlsWindow.Show()
     End Sub
 
-    ''' <summary>One-time initial layout: Controls to the right of Cassette, Album Art further
-    ''' right of Controls, Playlist spanning all three widths below. After this, all four windows
-    ''' are independently movable and resizable - this only avoids dropping them on top of each
-    ''' other at launch.</summary>
+    ''' <summary>One-time initial layout: wraps Cassette, Controls, Album Art, and Equalizer left to
+    ''' right, starting new rows as needed, so the whole set fits within the primary monitor's work
+    ''' area instead of running off the side of a smaller screen; Playlist always goes last, spanning
+    ''' the wrapped width, below everything else. After this, all five windows are independently
+    ''' movable and resizable - this only avoids dropping them on top of each other, or off-screen,
+    ''' at launch.</summary>
     Private Sub LayoutCompanionWindows()
-        controlsWindow.Left = Left + ActualWidth + 10
-        controlsWindow.Top = Top
+        Const margin As Double = 10
+        Dim area = SystemParameters.WorkArea
 
-        albumArtWindow.Left = controlsWindow.Left + controlsWindow.Width + 10
-        albumArtWindow.Top = Top
+        Dim x = area.Left + margin
+        Dim y = area.Top + margin
+        Dim rowHeight As Double = 0
+        Dim contentRight As Double = x
 
-        playlistWindow.Left = Left
-        playlistWindow.Top = Top + Math.Max(ActualHeight, Math.Max(controlsWindow.Height, albumArtWindow.Height)) + 10
-        playlistWindow.Width = ActualWidth + controlsWindow.Width + albumArtWindow.Width + 20
+        Dim PlaceNext =
+            Sub(win As Window, w As Double, h As Double)
+                If x > area.Left + margin AndAlso x + w > area.Right - margin Then
+                    x = area.Left + margin
+                    y += rowHeight + margin
+                    rowHeight = 0
+                End If
+                win.Left = x
+                win.Top = Math.Min(y, area.Bottom - margin - h)
+                x += w + margin
+                contentRight = Math.Max(contentRight, x)
+                rowHeight = Math.Max(rowHeight, h)
+            End Sub
+
+        PlaceNext(Me, ActualWidth, ActualHeight)
+        PlaceNext(controlsWindow, controlsWindow.Width, controlsWindow.Height)
+        PlaceNext(albumArtWindow, albumArtWindow.Width, albumArtWindow.Height)
+        PlaceNext(equalizerWindow, equalizerWindow.Width, equalizerWindow.Height)
+        PlaceNext(visualizerWindow, visualizerWindow.Width, visualizerWindow.Height)
+        PlaceNext(equalizerControlsWindow, equalizerControlsWindow.Width, equalizerControlsWindow.Height)
+
+        y += rowHeight + margin
+        playlistWindow.Left = area.Left + margin
+        playlistWindow.Top = Math.Min(y, area.Bottom - margin - playlistWindow.Height)
+        playlistWindow.Width = Math.Min(contentRight - area.Left - margin, area.Width - margin * 2)
     End Sub
 
     ' ---- Playlist ----------------------------------------------------
@@ -383,17 +431,33 @@ Class Cassette
             Return
         End If
 
+        Try
+            engine.Load(filePath)
+        Catch ex As Exception
+            StatusText.Text = "Audio failed to load: " & ex.Message
+            Return
+        End Try
+
         songPlaying = filePath
         ResetStretch()
         ResetLines()
         ResetCenterWindow()
-        AudioPlayer.Source = New Uri(filePath)
-        AudioPlayer.Play()
+        engine.Play()
         SpinWheels()
         positionTimer.Start()
         StatusText.Text = "Playing: " & Path.GetFileName(filePath)
         albumArtWindow.SetArt(AlbumArtReader.TryGetAlbumArt(filePath))
         UpdateMixtapeLabelText(filePath)
+        equalizerWindow.SetPlaying(True)
+        visualizerWindow.SetPlaying(True)
+
+        ' NAudio's AudioFileReader parses the header synchronously, so - unlike MediaElement's
+        ' MediaOpened - the duration is already known right here; no separate "opened" event needed.
+        songLength = engine.Duration
+        AnimateStretch(fromScale:=1, duration:=songLength)
+        AnimateLines(fromScale:=1, duration:=songLength)
+        AnimateCenterWindow(fromOffset:=0, duration:=songLength)
+        UpdateTimeDisplay()
     End Sub
 
     ''' <summary>Shows the loaded mixtape's embedded label (MixtapeBuilder's TIT2 title) at the top
@@ -451,8 +515,7 @@ Class Cassette
         seekTimer.Stop()
         sfx.StopLoop()
         positionTimer.Stop()
-        AudioPlayer.SpeedRatio = 1
-        AudioPlayer.Stop()
+        engine.Stop()
         StatusText.Text = "Stopped"
         songLength = TimeSpan.Zero
         TimeText.Text = String.Empty
@@ -460,18 +523,39 @@ Class Cassette
         ResetLines()
         ResetCenterWindow()
         StopWheels()
+        equalizerWindow.SetPlaying(False)
+        visualizerWindow.SetPlaying(False)
     End Sub
 
-    Private Sub AudioPlayer_MediaOpened(sender As Object, e As RoutedEventArgs)
-        songLength = AudioPlayer.NaturalDuration.TimeSpan
-        AnimateStretch(fromScale:=1, duration:=songLength)
-        AnimateLines(fromScale:=1, duration:=songLength)
-        AnimateCenterWindow(fromOffset:=0, duration:=songLength)
-        UpdateTimeDisplay()
+    ' ---- Volume / Mute ---------------------------------------------------
+
+    Private Sub VolumeSlider_ValueChanged(sender As Object, e As RoutedPropertyChangedEventArgs(Of Double))
+        controlsWindow.VolumeText.Text = $"{CInt(Math.Round(e.NewValue * 100))}%"
+
+        If isMuted Then
+            ' Dragging the slider while muted unmutes automatically - matches how every other
+            ' volume control (Windows, browsers, media players) behaves.
+            isMuted = False
+            controlsWindow.MuteButton.Content = "🔊"
+        End If
+
+        volumeBeforeMute = e.NewValue
+        engine.Volume = CSng(e.NewValue)
+    End Sub
+
+    Private Sub MuteButton_Click(sender As Object, e As RoutedEventArgs)
+        isMuted = Not isMuted
+        If isMuted Then
+            engine.Volume = 0
+            controlsWindow.MuteButton.Content = "🔇"
+        Else
+            engine.Volume = CSng(volumeBeforeMute)
+            controlsWindow.MuteButton.Content = "🔊"
+        End If
     End Sub
 
     ''' <summary>Shows time remaining and total song length, e.g. "-2:15 / 3:45". Refreshed on a
-    ''' timer during playback and seeking alike, since both move AudioPlayer.Position.</summary>
+    ''' timer during playback and seeking alike, since both move engine.Position.</summary>
     Private Sub PositionTimer_Tick(sender As Object, e As EventArgs)
         UpdateTimeDisplay()
     End Sub
@@ -482,17 +566,17 @@ Class Cassette
             Return
         End If
 
-        Dim remaining = songLength - AudioPlayer.Position
+        Dim remaining = songLength - engine.Position
         If remaining < TimeSpan.Zero Then remaining = TimeSpan.Zero
         TimeText.Text = $"-{remaining:mm\:ss} / {songLength:mm\:ss}"
     End Sub
 
-    Private Sub AudioPlayer_MediaEnded(sender As Object, e As RoutedEventArgs)
-        StopPlayback()
-    End Sub
-
-    Private Sub AudioPlayer_MediaFailed(sender As Object, e As ExceptionRoutedEventArgs)
-        StatusText.Text = "Audio failed to load: " & e.ErrorException.Message
+    ''' <summary>engine.PlaybackEnded only fires when a track finishes on its own (not when Stop or
+    ''' a new Load caused playback to stop) - mirrors what MediaElement's MediaEnded used to do.
+    ''' Raised off NAudio's own callback thread's captured SynchronizationContext, which should
+    ''' already be the UI thread's, but Dispatcher.Invoke keeps that guaranteed either way.</summary>
+    Private Sub Engine_PlaybackEnded()
+        Dispatcher.Invoke(AddressOf StopPlayback)
     End Sub
 
     ' ---- Wheel / tape-stretch animation ---------------------------------
@@ -543,7 +627,7 @@ Class Cassette
     Private Sub ResumeWheels()
         SpinWheels()
         If songLength > TimeSpan.Zero Then
-            Dim remaining = songLength - AudioPlayer.Position
+            Dim remaining = songLength - engine.Position
             ' currentStretchTransform.ScaleX is the signed value (negative on Side B); AnimateStretch
             ' wants the unsigned magnitude and applies currentStretchSign itself, so undo the sign here.
             AnimateStretch(currentStretchTransform.ScaleX * currentStretchSign, remaining)
@@ -629,10 +713,6 @@ Class Cassette
     ' True only while a seek is actively in progress (mouse held on Rewind/FF).
     Private isSeeking As Boolean
 
-    ' How much faster the real song audio plays (in either direction) while rewind/fast-forward
-    ' is held, so you hear the actual clip sped up instead of silence — the classic tape-deck effect.
-    Private ReadOnly SeekAudioSpeedRatio As Double = 3
-
     Private Sub RewindButton_MouseDown(sender As Object, e As MouseButtonEventArgs)
         BeginSeeking(DirectCast(sender, UIElement), -1)
     End Sub
@@ -641,19 +721,20 @@ Class Cassette
         BeginSeeking(DirectCast(sender, UIElement), 1)
     End Sub
 
-    ''' <summary>Starts seeking: speeds up real playback (so you hear the actual song sped up as
-    ''' the seek sound effect, instead of silence) while the timer keeps yanking the position in
-    ''' the seek direction on top of that, captures the mouse so releasing outside the button still
-    ''' ends the seek, and spins the wheels fast in that direction. Takes one seek step immediately
-    ''' so a quick click seeks too, not just a held-down press.</summary>
+    ''' <summary>Starts seeking: pauses real playback (so the only audio you hear while winding is
+    ''' the seek_whir.wav sound effect, same as a real tape deck muting itself during fast-wind)
+    ''' while the timer keeps yanking the position in the seek direction, captures the mouse so
+    ''' releasing outside the button still ends the seek, and spins the wheels fast in that
+    ''' direction. Takes one seek step immediately so a quick click seeks too, not just a held-down
+    ''' press. Pausing (rather than the old speed-up-and-keep-playing approach) also means nothing
+    ''' is reading from the engine while SeekTimer_Tick is jamming its position around.</summary>
     Private Sub BeginSeeking(source As UIElement, direction As Integer)
-        If AudioPlayer.Source Is Nothing Then Return
+        If Not engine.IsLoaded Then Return
         seekDirection = direction
         isSeeking = True
         source.CaptureMouse()
         sfx.StartLoop("seek_whir.wav")
-        AudioPlayer.SpeedRatio = SeekAudioSpeedRatio
-        AudioPlayer.Play()
+        engine.Pause()
         SpinWheelsSeeking(seekDirection)
         SeekTimer_Tick(Nothing, EventArgs.Empty)
         If isSeeking Then seekTimer.Start()
@@ -675,20 +756,19 @@ Class Cassette
         If Not isSeeking Then Return
         isSeeking = False
         seekTimer.Stop()
-        AudioPlayer.SpeedRatio = 1
-        If AudioPlayer.Source IsNot Nothing Then
-            AudioPlayer.Play()
+        If engine.IsLoaded Then
+            engine.Play()
             ResumeWheels()
         End If
     End Sub
 
     Private Sub SeekTimer_Tick(sender As Object, e As EventArgs)
-        If AudioPlayer.Source Is Nothing Then Return
+        If Not engine.IsLoaded Then Return
 
-        Dim newPosition = AudioPlayer.Position + TimeSpan.FromSeconds(seekDirection)
+        Dim newPosition = engine.Position + TimeSpan.FromSeconds(seekDirection)
         If newPosition < TimeSpan.Zero Then newPosition = TimeSpan.Zero
         If newPosition > songLength Then newPosition = songLength
-        AudioPlayer.Position = newPosition
+        engine.Position = newPosition
         UpdateStretchForPosition(newPosition)
 
         Dim label = If(seekDirection < 0, "Rewinding", "Fast-forwarding")
@@ -750,6 +830,7 @@ Class Cassette
     Private Sub Cassette_Closing(sender As Object, e As CancelEventArgs)
         If isRecording Then StopRecording()
         sfx.StopLoop()
+        engine.Dispose()
     End Sub
 
     Private Sub WaveIn_RecordingStopped(sender As Object, e As StoppedEventArgs)
