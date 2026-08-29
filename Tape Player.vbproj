@@ -85,6 +85,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Fonts\ChakraPetch-Bold.ttf" />
     <Resource Include="TapeCassette.ico" />
     <Resource Include="albumart.jpg" />
     <Resource Include="ABC.png" />

@@ -1,4 +1,3 @@
-Imports System.ComponentModel
 Imports System.IO
 Imports System.Linq
 Imports System.Windows.Media.Animation
@@ -150,66 +149,52 @@ Class Cassette
         engine.Volume = CSng(controlsWindow.VolumeSlider.Value)
     End Sub
 
-    ''' The cassette sits still on launch (wheels only start spinning once Play is pressed);
-    ''' MediaElement.Play() is also unreliable before the window has actually been shown.
-    ''' Showing the other two windows also waits until here: Owner can only be set once this
-    ''' window has actually been shown, and Left/ActualWidth/ActualHeight aren't final before then.
-    Private Sub Cassette_Loaded(sender As Object, e As RoutedEventArgs)
-        controlsWindow.Owner = Me
-        playlistWindow.Owner = Me
-        albumArtWindow.Owner = Me
-        equalizerWindow.Owner = Me
-        visualizerWindow.Owner = Me
-        equalizerControlsWindow.Owner = Me
-        LayoutCompanionWindows()
-        controlsWindow.Show()
-        playlistWindow.Show()
-        albumArtWindow.Show()
-        equalizerWindow.Show()
-        visualizerWindow.Show()
-        equalizerControlsWindow.Show()
-    End Sub
+    ''' <summary>The other six panels are exposed here so MainWindow can slot each one into its own
+    ''' AvalonDock LayoutAnchorable - Cassette still owns them (creates them, wires their buttons,
+    ''' holds all the playback/recording/animation logic) exactly as when they were separate
+    ''' top-level windows; only how they get displayed changed.</summary>
+    Public ReadOnly Property ControlsView As ControlsWindow
+        Get
+            Return controlsWindow
+        End Get
+    End Property
 
-    ''' <summary>One-time initial layout: wraps Cassette, Controls, Album Art, and Equalizer left to
-    ''' right, starting new rows as needed, so the whole set fits within the primary monitor's work
-    ''' area instead of running off the side of a smaller screen; Playlist always goes last, spanning
-    ''' the wrapped width, below everything else. After this, all five windows are independently
-    ''' movable and resizable - this only avoids dropping them on top of each other, or off-screen,
-    ''' at launch.</summary>
-    Private Sub LayoutCompanionWindows()
-        Const margin As Double = 10
-        Dim area = SystemParameters.WorkArea
+    Public ReadOnly Property PlaylistView As PlaylistWindow
+        Get
+            Return playlistWindow
+        End Get
+    End Property
 
-        Dim x = area.Left + margin
-        Dim y = area.Top + margin
-        Dim rowHeight As Double = 0
-        Dim contentRight As Double = x
+    Public ReadOnly Property AlbumArtView As AlbumArtWindow
+        Get
+            Return albumArtWindow
+        End Get
+    End Property
 
-        Dim PlaceNext =
-            Sub(win As Window, w As Double, h As Double)
-                If x > area.Left + margin AndAlso x + w > area.Right - margin Then
-                    x = area.Left + margin
-                    y += rowHeight + margin
-                    rowHeight = 0
-                End If
-                win.Left = x
-                win.Top = Math.Min(y, area.Bottom - margin - h)
-                x += w + margin
-                contentRight = Math.Max(contentRight, x)
-                rowHeight = Math.Max(rowHeight, h)
-            End Sub
+    Public ReadOnly Property EqualizerView As EqualizerWindow
+        Get
+            Return equalizerWindow
+        End Get
+    End Property
 
-        PlaceNext(Me, ActualWidth, ActualHeight)
-        PlaceNext(controlsWindow, controlsWindow.Width, controlsWindow.Height)
-        PlaceNext(albumArtWindow, albumArtWindow.Width, albumArtWindow.Height)
-        PlaceNext(equalizerWindow, equalizerWindow.Width, equalizerWindow.Height)
-        PlaceNext(visualizerWindow, visualizerWindow.Width, visualizerWindow.Height)
-        PlaceNext(equalizerControlsWindow, equalizerControlsWindow.Width, equalizerControlsWindow.Height)
+    Public ReadOnly Property VisualizerView As VisualizerWindow
+        Get
+            Return visualizerWindow
+        End Get
+    End Property
 
-        y += rowHeight + margin
-        playlistWindow.Left = area.Left + margin
-        playlistWindow.Top = Math.Min(y, area.Bottom - margin - playlistWindow.Height)
-        playlistWindow.Width = Math.Min(contentRight - area.Left - margin, area.Width - margin * 2)
+    Public ReadOnly Property EqualizerControlsView As EqualizerControlsWindow
+        Get
+            Return equalizerControlsWindow
+        End Get
+    End Property
+
+    ''' <summary>Called by MainWindow's own Closing handler - Cassette is a UserControl now (hosted
+    ''' in a dock pane) and has no Closing event of its own.</summary>
+    Public Sub Cleanup()
+        If isRecording Then StopRecording()
+        sfx.StopLoop()
+        engine.Dispose()
     End Sub
 
     ' ---- Playlist ----------------------------------------------------
@@ -334,7 +319,7 @@ Class Cassette
             .Filter = "Audio Files (*.mp3;*.wav;*.flac)|*.mp3;*.wav;*.flac|All Files (*.*)|*.*",
             .CheckFileExists = True
         }
-        If dialog.ShowDialog(Me) = True Then
+        If dialog.ShowDialog(Window.GetWindow(Me)) = True Then
             OpenAudioFile(dialog.FileName)
         End If
     End Sub
@@ -343,7 +328,7 @@ Class Cassette
         Dim dialog As New Microsoft.Win32.OpenFolderDialog With {
             .Title = "Open Folder"
         }
-        If dialog.ShowDialog(Me) = True Then
+        If dialog.ShowDialog(Window.GetWindow(Me)) = True Then
             OpenAudioFolder(dialog.FolderName)
         End If
     End Sub
@@ -401,7 +386,7 @@ Class Cassette
     ''' can't be shown again; refreshes the playlist once it reports a tape was written so the
     ''' new 60minTape.mp3/90minTape.mp3 shows up immediately.</summary>
     Private Sub MixtapeButton_Click(sender As Object, e As RoutedEventArgs)
-        Dim mixtapeWindow As New MixtapeWindow With {.Owner = Me}
+        Dim mixtapeWindow As New MixtapeWindow With {.Owner = Window.GetWindow(Me)}
         AddHandler mixtapeWindow.MixtapeBuilt, AddressOf MixtapeWindow_MixtapeBuilt
         mixtapeWindow.ShowDialog()
     End Sub
@@ -413,7 +398,7 @@ Class Cassette
     ''' <summary>Opens the mixtape picker as a fresh window each time; loading a mixtape adds it
     ''' to the playlist (like Open File) and starts it playing right away.</summary>
     Private Sub LoadMixtapeButton_Click(sender As Object, e As RoutedEventArgs)
-        Dim loadWindow As New LoadMixtapeWindow With {.Owner = Me}
+        Dim loadWindow As New LoadMixtapeWindow With {.Owner = Window.GetWindow(Me)}
         AddHandler loadWindow.MixtapeSelected, AddressOf LoadMixtapeWindow_MixtapeSelected
         loadWindow.ShowDialog()
     End Sub
@@ -825,12 +810,6 @@ Class Cassette
     Private Sub StopRecording()
         sfx.Play("release.wav")
         micInput?.StopRecording()
-    End Sub
-
-    Private Sub Cassette_Closing(sender As Object, e As CancelEventArgs)
-        If isRecording Then StopRecording()
-        sfx.StopLoop()
-        engine.Dispose()
     End Sub
 
     Private Sub WaveIn_RecordingStopped(sender As Object, e As StoppedEventArgs)

@@ -42,7 +42,7 @@ Class VisualizerWindow
                                    BuildGridLines()
                                    renderTimer.Start()
                                End Sub
-        AddHandler Me.Closed, Sub() renderTimer.Stop()
+        AddHandler Me.Unloaded, Sub() renderTimer.Stop()
     End Sub
 
     ''' <summary>Tells the visualizer whether audio is actually playing. The trace eases its energy

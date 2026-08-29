@@ -64,7 +64,7 @@ Class EqualizerWindow
                                    BuildGridLines()
                                    renderTimer.Start()
                                End Sub
-        AddHandler Me.Closed, Sub() renderTimer.Stop()
+        AddHandler Me.Unloaded, Sub() renderTimer.Stop()
     End Sub
 
     ''' <summary>Tells the equalizer whether audio is actually playing. Bars ease their energy

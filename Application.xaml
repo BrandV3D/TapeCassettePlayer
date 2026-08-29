@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Tape_Player"
-             StartupUri="Cassette.xaml">
+             StartupUri="MainWindow.xaml">
     <Application.Resources>
 
         <!-- Every window gets the cassette icon in its title bar/taskbar entry, to match the

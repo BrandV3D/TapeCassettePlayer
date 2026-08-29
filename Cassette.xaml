@@ -1,13 +1,10 @@
-<Window x:Class="Cassette"
+<UserControl x:Class="Cassette"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
-        mc:Ignorable="d"
-        Title="Cassette" Height="450" Width="770"
-        WindowStartupLocation="Manual" ResizeMode="CanResize"
-        Closing="Cassette_Closing" Loaded="Cassette_Loaded">
+        mc:Ignorable="d">
     <Viewbox Stretch="Uniform">
         <Grid Width="800" Height="450">
             <Grid.RowDefinitions>
@@ -107,4 +104,4 @@
             </TextBlock>
         </Grid>
     </Viewbox>
-</Window>
+</UserControl>
