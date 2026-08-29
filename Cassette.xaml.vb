@@ -132,6 +132,7 @@ Class Cassette
         AddHandler positionTimer.Tick, AddressOf PositionTimer_Tick
         AddHandler engine.PlaybackEnded, AddressOf Engine_PlaybackEnded
         WireControlsWindow()
+        AddHandler playlistWindow.RefreshRequested, AddressOf LoadPlaylist
         LoadPlaylist()
         LoadCassetteImages()
     End Sub
