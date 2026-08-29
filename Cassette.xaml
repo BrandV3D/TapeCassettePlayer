@@ -32,6 +32,19 @@
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
+            <!-- Side B's counterpart to StretchSongItem: anchored at its LEFT edge (instead of the
+                 right) so it grows rightward, near left_wheel instead of right_wheel - the mirror
+                 image of Side A's tape-stretch visual. Shown only while a Side B track is playing. -->
+            <Image x:Name="StretchSongItemSideB" Visibility="Collapsed" Margin="198,73,6,218" Stretch="Fill" Source="/NewFilmTapeBailBrown.png" RenderTransformOrigin="0,0.5" Grid.Column="1" Grid.Row="1">
+                <Image.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="StretchScaleTransformSideB"/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </Image.RenderTransform>
+            </Image>
             <Image x:Name="center" Grid.ColumnSpan="2" Margin="2,64,306,203" Source="/New Project (1).png" Stretch="Fill" Grid.Row="1" Grid.Column="2"/>
             <Image x:Name="right_wheel" Margin="158,63,179,199" Source="/WHEELSMALLFINALBULB.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Grid.Column="3" Grid.Row="1" Width="100" Height="100">
                 <Image.RenderTransform>

@@ -1,0 +1,28 @@
+<Window x:Class="LoadMixtapeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d"
+        Title="Load Mixtape" Width="440" Height="360" MinWidth="320" MinHeight="240" ResizeMode="CanResize"
+        Background="#FF1E1E1E" WindowStartupLocation="CenterOwner">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Foreground="White" Margin="2,0,2,6" TextWrapping="Wrap"
+                   Text="Mixtapes you've built with Make Mixtape. Pick one and press Load to add it to the playlist and start playing."/>
+
+        <ListBox x:Name="MixtapesList" Grid.Row="1" Background="#FF1E1E1E" Foreground="White" FontSize="13" BorderThickness="1" BorderBrush="#FF3C3C3C"/>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="2" HorizontalAlignment="Right" Margin="0,6,0,0">
+            <Button x:Name="RefreshButton" Content="Refresh" Padding="8,3" Margin="2"/>
+            <Button x:Name="LoadButton" Content="▶ Load" Padding="8,3" Margin="2"/>
+            <Button x:Name="CancelButton" Content="Cancel" Padding="8,3" Margin="2"/>
+        </StackPanel>
+    </Grid>
+</Window>

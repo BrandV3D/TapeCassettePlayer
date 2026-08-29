@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
         mc:Ignorable="d"
-        Title="Controls" Width="320" Height="220" ResizeMode="CanResize"
+        Title="Controls" Width="620" Height="220" ResizeMode="CanResize"
         Background="#FF1E1E1E">
     <Viewbox Stretch="Uniform">
-        <StackPanel Width="290" Margin="6">
+        <StackPanel Width="590" Margin="6">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <StackPanel Margin="2" HorizontalAlignment="Center">
                     <Button x:Name="RewindButton" Content="⏪" Width="30"/>
@@ -42,10 +42,16 @@
                     <Button x:Name="SwitchTapeButton" Content="🔄" Width="30" ToolTip="Switch Tape"/>
                     <TextBlock Text="Switch" FontSize="9" Foreground="White" HorizontalAlignment="Center"/>
                 </StackPanel>
+                <StackPanel Margin="2" HorizontalAlignment="Center">
+                    <Button x:Name="FlipTapeButton" Content="🔃" Width="30" ToolTip="Flip to Side B"/>
+                    <TextBlock Text="Flip" FontSize="9" Foreground="White" HorizontalAlignment="Center"/>
+                </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
                 <Button x:Name="OpenFileButton" Content="📄 Open File..." Padding="6,2" Margin="2" FontSize="10"/>
                 <Button x:Name="OpenFolderButton" Content="📂 Open Folder..." Padding="6,2" Margin="2" FontSize="10"/>
+                <Button x:Name="MixtapeButton" Content="🎧 Make Mixtape..." Padding="6,2" Margin="2" FontSize="10"/>
+                <Button x:Name="LoadMixtapeButton" Content="📼 Load Mixtape..." Padding="6,2" Margin="2" FontSize="10"/>
             </StackPanel>
             <TextBlock x:Name="StatusText" Text="Ready" Foreground="White" Margin="2,6" TextWrapping="Wrap"/>
             <TextBlock x:Name="TimeText" Text="" Foreground="White" Margin="2,0,2,6" TextWrapping="Wrap"/>

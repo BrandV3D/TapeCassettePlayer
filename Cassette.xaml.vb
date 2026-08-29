@@ -47,6 +47,16 @@ Class Cassette
     Private ReadOnly extraFiles As New List(Of String)
     Private ReadOnly AudioExtensions As String() = {"*.mp3", "*.wav", "*.flac"}
 
+    ' Flip Tape: Side A is whatever's normally playing; Side B is a second track, flipped to the
+    ' other side visually (StretchSongItemSideB instead of StretchSongItem). sideATrackPath
+    ' remembers Side A's track so flipping back resumes it instead of starting over from scratch.
+    Private isSideB As Boolean
+    Private sideATrackPath As String
+
+    ' Points at whichever of StretchScaleTransform/StretchScaleTransformSideB is currently active,
+    ' so the stretch-animation code below doesn't need to know which side is showing.
+    Private currentStretchTransform As ScaleTransform
+
     ' The tape visual (this window), the transport controls, and the playlist are three
     ' independent, freely movable/resizable windows; Cassette owns the other two and holds
     ' all the playback/recording/animation logic for all three.
@@ -85,6 +95,7 @@ Class Cassette
 
     Public Sub New()
         InitializeComponent()
+        currentStretchTransform = StretchScaleTransform
         AddHandler seekTimer.Tick, AddressOf SeekTimer_Tick
         AddHandler positionTimer.Tick, AddressOf PositionTimer_Tick
         WireControlsWindow()
@@ -108,8 +119,11 @@ Class Cassette
         AddHandler controlsWindow.FastForwardButton.LostMouseCapture, AddressOf SeekButton_LostMouseCapture
         AddHandler controlsWindow.RecordButton.Click, AddressOf RecordButton_Click
         AddHandler controlsWindow.SwitchTapeButton.Click, AddressOf SwitchTapeButton_Click
+        AddHandler controlsWindow.FlipTapeButton.Click, AddressOf FlipTapeButton_Click
         AddHandler controlsWindow.OpenFileButton.Click, AddressOf OpenFileButton_Click
         AddHandler controlsWindow.OpenFolderButton.Click, AddressOf OpenFolderButton_Click
+        AddHandler controlsWindow.MixtapeButton.Click, AddressOf MixtapeButton_Click
+        AddHandler controlsWindow.LoadMixtapeButton.Click, AddressOf LoadMixtapeButton_Click
     End Sub
 
     ''' The cassette sits still on launch (wheels only start spinning once Play is pressed);
@@ -214,6 +228,38 @@ Class Cassette
         ApplyCassetteImage()
     End Sub
 
+    ' ---- Flip Tape (Side A / Side B) -------------------------------------
+
+    ''' <summary>Flips the tape over: Side A is whatever was already playing (remembered so
+    ''' flipping back resumes it); Side B is the next track in the playlist. Either way, swaps
+    ''' which of StretchSongItem/StretchSongItemSideB is showing to match.</summary>
+    Private Sub FlipTapeButton_Click(sender As Object, e As RoutedEventArgs)
+        If isSideB Then
+            SetTapeSide(sideB:=False)
+            If Not String.IsNullOrEmpty(sideATrackPath) Then PlaySong(sideATrackPath)
+        Else
+            If PlaylistBox.Items.Count < 2 Then
+                StatusText.Text = "Add another track to the playlist to use Side B"
+                Return
+            End If
+
+            sideATrackPath = songPlaying
+            SetTapeSide(sideB:=True)
+            AdvancePlaylist(1)
+        End If
+    End Sub
+
+    ''' <summary>Switches which side's tape-stretch visual is showing and which transform the
+    ''' stretch-animation methods below drive, then resets it to its at-rest state.</summary>
+    Private Sub SetTapeSide(sideB As Boolean)
+        isSideB = sideB
+        StretchSongItem.Visibility = If(sideB, Visibility.Collapsed, Visibility.Visible)
+        StretchSongItemSideB.Visibility = If(sideB, Visibility.Visible, Visibility.Collapsed)
+        currentStretchTransform = If(sideB, StretchScaleTransformSideB, StretchScaleTransform)
+        controlsWindow.FlipTapeButton.ToolTip = If(sideB, "Flip to Side A", "Flip to Side B")
+        ResetStretch()
+    End Sub
+
     ' ---- Open File / Open Folder ----------------------------------------
 
     Private Sub OpenFileButton_Click(sender As Object, e As RoutedEventArgs)
@@ -281,6 +327,33 @@ Class Cassette
         Dim item = PlaylistBox.Items.OfType(Of ListBoxItem)().
             FirstOrDefault(Function(i) CStr(i.Tag).Equals(filePath, StringComparison.OrdinalIgnoreCase))
         If item IsNot Nothing Then PlaylistBox.SelectedItem = item
+    End Sub
+
+    ' ---- Mixtape (pick songs, bake them into 60minTape.mp3/90minTape.mp3) -----
+
+    ''' <summary>Opens the mixtape builder as a fresh window each time, since a closed WPF Window
+    ''' can't be shown again; refreshes the playlist once it reports a tape was written so the
+    ''' new 60minTape.mp3/90minTape.mp3 shows up immediately.</summary>
+    Private Sub MixtapeButton_Click(sender As Object, e As RoutedEventArgs)
+        Dim mixtapeWindow As New MixtapeWindow With {.Owner = Me}
+        AddHandler mixtapeWindow.MixtapeBuilt, AddressOf MixtapeWindow_MixtapeBuilt
+        mixtapeWindow.ShowDialog()
+    End Sub
+
+    Private Sub MixtapeWindow_MixtapeBuilt(outputPath As String)
+        LoadPlaylist()
+    End Sub
+
+    ''' <summary>Opens the mixtape picker as a fresh window each time; loading a mixtape adds it
+    ''' to the playlist (like Open File) and starts it playing right away.</summary>
+    Private Sub LoadMixtapeButton_Click(sender As Object, e As RoutedEventArgs)
+        Dim loadWindow As New LoadMixtapeWindow With {.Owner = Me}
+        AddHandler loadWindow.MixtapeSelected, AddressOf LoadMixtapeWindow_MixtapeSelected
+        loadWindow.ShowDialog()
+    End Sub
+
+    Private Sub LoadMixtapeWindow_MixtapeSelected(tapePath As String)
+        OpenAudioFile(tapePath)
     End Sub
 
     ' ---- Play / Stop ---------------------------------------------------
@@ -436,7 +509,7 @@ Class Cassette
         SpinWheels()
         If songLength > TimeSpan.Zero Then
             Dim remaining = songLength - AudioPlayer.Position
-            AnimateStretch(StretchScaleTransform.ScaleX, remaining)
+            AnimateStretch(currentStretchTransform.ScaleX, remaining)
             AnimateLines(LinesScaleTransform.ScaleY, remaining)
             AnimateCenterWindow(CenterWindowCopyTranslateTransform.X, remaining)
         End If
@@ -448,8 +521,9 @@ Class Cassette
         target.SetValue(prop, current)
     End Sub
 
-    ''' <summary>Grows StretchSongItem from <paramref name="fromScale"/> to 10x size,
-    ''' anchored at its right edge so it stretches to the left, over <paramref name="duration"/>.</summary>
+    ''' <summary>Grows the active side's stretch item (StretchSongItem or StretchSongItemSideB,
+    ''' per <see cref="currentStretchTransform"/>) from <paramref name="fromScale"/> to 10x size,
+    ''' anchored at its outer edge so it stretches inward, over <paramref name="duration"/>.</summary>
     Private Sub AnimateStretch(fromScale As Double, duration As TimeSpan)
         If duration <= TimeSpan.Zero Then Return
         Dim anim As New DoubleAnimation With {
@@ -457,23 +531,23 @@ Class Cassette
             .To = 10,
             .Duration = New Duration(duration)
         }
-        StretchScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, anim)
+        currentStretchTransform.BeginAnimation(ScaleTransform.ScaleXProperty, anim)
     End Sub
 
     Private Sub ResetStretch()
-        StretchScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, Nothing)
-        StretchScaleTransform.ScaleX = 1
+        currentStretchTransform.BeginAnimation(ScaleTransform.ScaleXProperty, Nothing)
+        currentStretchTransform.ScaleX = 1
     End Sub
 
-    ''' <summary>Sets StretchSongItem's scale directly from <paramref name="position"/> within the
-    ''' song (bypassing the normal timeline animation), so while rewind/fast-forward is held it
-    ''' tracks exactly where the seek currently is instead of drifting on its own independent clock.</summary>
+    ''' <summary>Sets the active side's stretch item scale directly from <paramref name="position"/>
+    ''' within the song (bypassing the normal timeline animation), so while rewind/fast-forward is
+    ''' held it tracks exactly where the seek currently is instead of drifting on its own independent clock.</summary>
     Private Sub UpdateStretchForPosition(position As TimeSpan)
         If songLength <= TimeSpan.Zero Then Return
         Dim progress = position.TotalSeconds / songLength.TotalSeconds
         progress = Math.Max(0, Math.Min(1, progress))
-        StretchScaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, Nothing)
-        StretchScaleTransform.ScaleX = 1 + progress * 9
+        currentStretchTransform.BeginAnimation(ScaleTransform.ScaleXProperty, Nothing)
+        currentStretchTransform.ScaleX = 1 + progress * 9
     End Sub
 
     ''' <summary>Shrinks Lines from <paramref name="fromScale"/> down to half its height and back to full

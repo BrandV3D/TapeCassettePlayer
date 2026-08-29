@@ -1,0 +1,54 @@
+<Window x:Class="MixtapeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Tape_Player"
+        mc:Ignorable="d"
+        Title="Make Mixtape" Width="480" Height="470" MinWidth="380" MinHeight="360" ResizeMode="CanResize"
+        Background="#FF1E1E1E" WindowStartupLocation="CenterOwner">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,0,0,4">
+            <Button x:Name="AddFilesButton" Content="📄 Add Files..." Padding="6,2" Margin="2" FontSize="11"/>
+            <Button x:Name="AddFolderButton" Content="📂 Add Folder (+ subfolders)..." Padding="6,2" Margin="2" FontSize="11"/>
+            <Button x:Name="MoveUpButton" Content="▲" Width="26" Margin="2" ToolTip="Move Up"/>
+            <Button x:Name="MoveDownButton" Content="▼" Width="26" Margin="2" ToolTip="Move Down"/>
+            <Button x:Name="RemoveButton" Content="✕ Remove" Padding="6,2" Margin="2" FontSize="11"/>
+            <Button x:Name="ClearButton" Content="Clear" Padding="6,2" Margin="2" FontSize="11"/>
+        </StackPanel>
+
+        <ListBox x:Name="SongsList" Grid.Row="1" Background="#FF1E1E1E" Foreground="White" FontSize="13" BorderThickness="1" BorderBrush="#FF3C3C3C"/>
+
+        <TextBlock x:Name="SummaryText" Grid.Row="2" Foreground="White" Margin="2,6" Text="0 song(s) selected — total 00:00:00"/>
+
+        <StackPanel Grid.Row="3" Margin="2,0,2,2">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Label:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                <TextBox x:Name="LabelTextBox" Width="210" Padding="3,2"
+                         ToolTip="Optional. Leave blank to overwrite the default 60/90-min tape; type a label to save this as a new, separate mixtape file and embed the label in it."/>
+                <TextBlock Text="Font:" Foreground="White" VerticalAlignment="Center" Margin="10,0,4,0"/>
+                <ComboBox x:Name="LabelFontCombo" Width="150"/>
+            </StackPanel>
+            <Border Background="#FFF5E9C8" BorderBrush="#FFB89A5A" BorderThickness="1" CornerRadius="3"
+                    Margin="0,6,0,0" Padding="10,6" HorizontalAlignment="Stretch">
+                <TextBlock x:Name="LabelPreviewText" Text="(no label)" FontSize="18" Foreground="#FF2B2B2B" TextTrimming="CharacterEllipsis"/>
+            </Border>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Center" Margin="0,6,0,4">
+            <Button x:Name="Build60Button" Content="🎵 Build 60-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
+            <Button x:Name="Build90Button" Content="🎵 Build 90-Min Mixtape" Padding="8,4" Margin="4" FontSize="12"/>
+        </StackPanel>
+
+        <TextBlock x:Name="StatusText" Grid.Row="5" Foreground="#FFAAAAAA" Margin="2" TextWrapping="Wrap" Text="Add 10-12 songs, optionally label your mixtape, then build a 60- or 90-minute tape."/>
+    </Grid>
+</Window>
