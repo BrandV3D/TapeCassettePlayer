@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="ABC.png" />
+    <None Remove="albumart.jpg" />
     <None Remove="BackgroundCircleCovers.png" />
     <None Remove="BlockM2.png" />
     <None Remove="CenterBar.png" />
@@ -83,6 +84,7 @@
 
   <ItemGroup>
     <Resource Include="TapeCassette.ico" />
+    <Resource Include="albumart.jpg" />
     <Resource Include="ABC.png" />
     <Resource Include="BackgroundCircleCovers.png" />
     <Resource Include="BlockM2.png" />

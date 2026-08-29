@@ -8,10 +8,6 @@
         Title="Album Art" Width="300" Height="330" ResizeMode="CanResize"
         Background="#FF1E1E1E">
     <Border BorderBrush="#FF3A3A3A" BorderThickness="1" Background="#FF141414" Margin="8">
-        <Grid>
-            <Image x:Name="ArtImage" Stretch="Uniform" Margin="4"/>
-            <TextBlock x:Name="PlaceholderText" Text="No Album Art" Foreground="#FF7A7A7A"
-                       HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14"/>
-        </Grid>
+        <Image x:Name="ArtImage" Stretch="Uniform" Margin="4"/>
     </Border>
 </Window>

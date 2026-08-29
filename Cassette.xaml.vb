@@ -393,6 +393,17 @@ Class Cassette
         positionTimer.Start()
         StatusText.Text = "Playing: " & Path.GetFileName(filePath)
         albumArtWindow.SetArt(AlbumArtReader.TryGetAlbumArt(filePath))
+        UpdateMixtapeLabelText(filePath)
+    End Sub
+
+    ''' <summary>Shows the loaded mixtape's embedded label (MixtapeBuilder's TIT2 title) at the top
+    ''' of the cassette window, rendered in whatever font it was labeled with (TXXX:LabelFont);
+    ''' "Untitled" in the default font for a plain song or an unlabeled mixtape (ReadLabel already
+    ''' returns Nothing/blank for either case).</summary>
+    Private Sub UpdateMixtapeLabelText(filePath As String)
+        Dim tags = MixtapeBuilder.ReadLabel(filePath)
+        MixtapeLabelText.Text = If(String.IsNullOrWhiteSpace(tags.Label), "Untitled", tags.Label)
+        MixtapeLabelText.FontFamily = New FontFamily(If(String.IsNullOrWhiteSpace(tags.FontFamily), "Segoe UI", tags.FontFamily))
     End Sub
 
     Private Sub PlayButton_Click(sender As Object, e As RoutedEventArgs)

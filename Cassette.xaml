@@ -95,6 +95,17 @@
             </Image>
             <Image x:Name="WheelBubRight" Grid.Column="3" Margin="182,88,208,229" Grid.Row="1" Source="/WheelBub.png" Stretch="Fill" d:IsHidden="True"/>
             <Image x:Name="WheelBubLeft" Grid.Column="1" Margin="109,88,53,229" Grid.Row="1" Source="/WheelBub.png" Stretch="Fill" d:IsHidden="True"/>
+
+            <!-- Shows the loaded mixtape's embedded label (see MixtapeBuilder's TIT2/TXXX:LabelFont
+                 frames), rendered in whatever font it was labeled with; "Untitled" for a plain song
+                 or an unlabeled mixtape. -->
+            <TextBlock x:Name="MixtapeLabelText" Text="Untitled" Grid.RowSpan="2" Grid.ColumnSpan="4"
+                       HorizontalAlignment="Center" VerticalAlignment="Top"
+                       Margin="0,58,0,0" Foreground="#1560BD" FontSize="32" FontWeight="Normal">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="#0D3B66" BlurRadius="2" ShadowDepth="0.5" Opacity="0.5"/>
+                </TextBlock.Effect>
+            </TextBlock>
         </Grid>
     </Viewbox>
 </Window>
