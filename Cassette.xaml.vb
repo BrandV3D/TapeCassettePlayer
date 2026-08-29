@@ -69,6 +69,7 @@ Class Cassette
     ' all the playback/recording/animation logic for all three.
     Private ReadOnly controlsWindow As New ControlsWindow()
     Private ReadOnly playlistWindow As New PlaylistWindow()
+    Private ReadOnly albumArtWindow As New AlbumArtWindow()
 
     ''' <summary>Exposes playlistWindow's ListBox under the name every existing playlist call site
     ''' already uses, so PlaySong/LoadPlaylist/etc. didn't need to change when the ListBox moved
@@ -140,21 +141,27 @@ Class Cassette
     Private Sub Cassette_Loaded(sender As Object, e As RoutedEventArgs)
         controlsWindow.Owner = Me
         playlistWindow.Owner = Me
+        albumArtWindow.Owner = Me
         LayoutCompanionWindows()
         controlsWindow.Show()
         playlistWindow.Show()
+        albumArtWindow.Show()
     End Sub
 
-    ''' <summary>One-time initial layout: Controls to the right of Cassette, Playlist spanning
-    ''' both of their widths below. After this, all three windows are independently movable and
-    ''' resizable - this only avoids dropping them on top of each other at launch.</summary>
+    ''' <summary>One-time initial layout: Controls to the right of Cassette, Album Art further
+    ''' right of Controls, Playlist spanning all three widths below. After this, all four windows
+    ''' are independently movable and resizable - this only avoids dropping them on top of each
+    ''' other at launch.</summary>
     Private Sub LayoutCompanionWindows()
         controlsWindow.Left = Left + ActualWidth + 10
         controlsWindow.Top = Top
 
+        albumArtWindow.Left = controlsWindow.Left + controlsWindow.Width + 10
+        albumArtWindow.Top = Top
+
         playlistWindow.Left = Left
-        playlistWindow.Top = Top + Math.Max(ActualHeight, controlsWindow.Height) + 10
-        playlistWindow.Width = ActualWidth + controlsWindow.Width + 10
+        playlistWindow.Top = Top + Math.Max(ActualHeight, Math.Max(controlsWindow.Height, albumArtWindow.Height)) + 10
+        playlistWindow.Width = ActualWidth + controlsWindow.Width + albumArtWindow.Width + 20
     End Sub
 
     ' ---- Playlist ----------------------------------------------------
@@ -385,6 +392,7 @@ Class Cassette
         SpinWheels()
         positionTimer.Start()
         StatusText.Text = "Playing: " & Path.GetFileName(filePath)
+        albumArtWindow.SetArt(AlbumArtReader.TryGetAlbumArt(filePath))
     End Sub
 
     Private Sub PlayButton_Click(sender As Object, e As RoutedEventArgs)

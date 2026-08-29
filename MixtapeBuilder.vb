@@ -232,7 +232,7 @@ Public Class MixtapeBuilder
 
                     Dim frameSize = If(majorVersion >= 4,
                         ReadSyncSafeInt(tagBytes, pos + 4),
-                        (tagBytes(pos + 4) << 24) Or (tagBytes(pos + 5) << 16) Or (tagBytes(pos + 6) << 8) Or tagBytes(pos + 7))
+                        (CInt(tagBytes(pos + 4)) << 24) Or (CInt(tagBytes(pos + 5)) << 16) Or (CInt(tagBytes(pos + 6)) << 8) Or tagBytes(pos + 7))
                     If frameSize <= 0 Then Exit While
 
                     Dim contentStart = pos + 10
@@ -336,8 +336,12 @@ Public Class MixtapeBuilder
         Return (description, value)
     End Function
 
+    ''' <summary>Widens each byte to Integer before shifting - VB's shift operators mask the shift
+    ''' count modulo the OPERAND's declared bit width (8 for Byte), not the promoted result type's,
+    ''' so shifting a bare Byte by 8 or more silently becomes a no-op shift instead of overflowing
+    ''' into a wider type the way it would in most other languages.</summary>
     Private Shared Function ReadSyncSafeInt(bytes As Byte(), offset As Integer) As Integer
-        Return (bytes(offset) << 21) Or (bytes(offset + 1) << 14) Or (bytes(offset + 2) << 7) Or bytes(offset + 3)
+        Return (CInt(bytes(offset)) << 21) Or (CInt(bytes(offset + 1)) << 14) Or (CInt(bytes(offset + 2)) << 7) Or bytes(offset + 3)
     End Function
 
     Private Shared Function WriteSyncSafeInt(value As Integer) As Byte()
