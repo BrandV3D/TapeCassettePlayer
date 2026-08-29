@@ -4,68 +4,68 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
-        mc:Ignorable="d">
+        mc:Ignorable="d" Width="800">
     <Grid Background="{DynamicResource Bg1Brush}">
-    <Viewbox Stretch="Uniform">
-        <StackPanel Width="590" Margin="6">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="RewindButton" Content="⏪" Width="30"/>
-                    <TextBlock Text="Rewind" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+        <Viewbox Stretch="Uniform">
+            <StackPanel Width="380">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="RewindButton" Content="⏪" Width="30"/>
+                        <TextBlock Text="Rewind" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="PreviousButton" Content="⏮" Width="30"/>
+                        <TextBlock Text="Previous" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="PlayButton" Content="▶" Width="30"/>
+                        <TextBlock Text="Play" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="StopButton" Content="⏹" Width="30"/>
+                        <TextBlock Text="Stop" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="NextButton" Content="⏭" Width="30"/>
+                        <TextBlock Text="Next" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="FastForwardButton" Content="⏩" Width="30"/>
+                        <TextBlock Text="Forward" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="RecordButton" Content="⏺" Width="30"/>
+                        <TextBlock Text="Record" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="SwitchTapeButton" Content="🔄" Width="30" ToolTip="Switch Tape"/>
+                        <TextBlock Text="Switch" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="FlipTapeButton" Content="🔃" Width="30" ToolTip="Flip to Side B"/>
+                        <TextBlock Text="Flip" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Margin="2" HorizontalAlignment="Center">
+                        <Button x:Name="MuteButton" Content="🔊" Width="30" ToolTip="Mute"/>
+                        <TextBlock Text="Mute" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="PreviousButton" Content="⏮" Width="30"/>
-                    <TextBlock Text="Previous" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="PlayButton" Content="▶" Width="30"/>
-                    <TextBlock Text="Play" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="StopButton" Content="⏹" Width="30"/>
-                    <TextBlock Text="Stop" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="NextButton" Content="⏭" Width="30"/>
-                    <TextBlock Text="Next" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="FastForwardButton" Content="⏩" Width="30"/>
-                    <TextBlock Text="Forward" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="RecordButton" Content="⏺" Width="30"/>
-                    <TextBlock Text="Record" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="SwitchTapeButton" Content="🔄" Width="30" ToolTip="Switch Tape"/>
-                    <TextBlock Text="Switch" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="FlipTapeButton" Content="🔃" Width="30" ToolTip="Flip to Side B"/>
-                    <TextBlock Text="Flip" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-                <StackPanel Margin="2" HorizontalAlignment="Center">
-                    <Button x:Name="MuteButton" Content="🔊" Width="30" ToolTip="Mute"/>
-                    <TextBlock Text="Mute" FontSize="9" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                <TextBlock Text="🔈" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="2,0"/>
-                <Slider x:Name="VolumeSlider" Width="140" Minimum="0" Maximum="1" Value="0.5"
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                    <TextBlock Text="🔈" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="2,0"/>
+                    <Slider x:Name="VolumeSlider" Width="140" Minimum="0" Maximum="1" Value="0.5"
                         VerticalAlignment="Center" TickFrequency="0.1" IsSnapToTickEnabled="False"/>
-                <TextBlock Text="🔊" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="2,0"/>
-                <TextBlock x:Name="VolumeText" Text="50%" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Width="34" Margin="4,0,0,0"/>
+                    <TextBlock Text="🔊" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="2,0"/>
+                    <TextBlock x:Name="VolumeText" Text="50%" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Width="34" Margin="4,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                    <Button x:Name="OpenFileButton" Content="📄 Open File..." Padding="6,2" Margin="2" FontSize="10"/>
+                    <Button x:Name="OpenFolderButton" Content="📂 Open Folder..." Padding="6,2" Margin="2" FontSize="10"/>
+                    <Button x:Name="MixtapeButton" Content="🎧 Make Mixtape..." Padding="6,2" Margin="2" FontSize="10"/>
+                    <Button x:Name="LoadMixtapeButton" Content="📼 Load Mixtape..." Padding="6,2" Margin="2" FontSize="10"/>
+                </StackPanel>
+                <TextBlock x:Name="StatusText" Text="Ready" Foreground="{DynamicResource TextPrimaryBrush}" Margin="2,6" TextWrapping="Wrap" Width="366"/>
+                <TextBlock x:Name="TimeText" Text="" Foreground="{DynamicResource TextPrimaryBrush}" Margin="2,0,2,6" TextWrapping="Wrap" Width="366"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
-                <Button x:Name="OpenFileButton" Content="📄 Open File..." Padding="6,2" Margin="2" FontSize="10"/>
-                <Button x:Name="OpenFolderButton" Content="📂 Open Folder..." Padding="6,2" Margin="2" FontSize="10"/>
-                <Button x:Name="MixtapeButton" Content="🎧 Make Mixtape..." Padding="6,2" Margin="2" FontSize="10"/>
-                <Button x:Name="LoadMixtapeButton" Content="📼 Load Mixtape..." Padding="6,2" Margin="2" FontSize="10"/>
-            </StackPanel>
-            <TextBlock x:Name="StatusText" Text="Ready" Foreground="{DynamicResource TextPrimaryBrush}" Margin="2,6" TextWrapping="Wrap"/>
-            <TextBlock x:Name="TimeText" Text="" Foreground="{DynamicResource TextPrimaryBrush}" Margin="2,0,2,6" TextWrapping="Wrap"/>
-        </StackPanel>
-    </Viewbox>
+        </Viewbox>
     </Grid>
 </UserControl>

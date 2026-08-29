@@ -32,7 +32,7 @@ Class Cassette
 
     ' Recording (mic -> wav) via NAudio.
     Private isRecording As Boolean
-    Private micInput As WaveIn
+    Private loopbackCapture As WasapiLoopbackCapture
     Private waveWriter As WaveFileWriter
     Private recordingPath As String
 
@@ -833,7 +833,11 @@ Class Cassette
         End If
     End Sub
 
-    ' ---- Record (mic -> wav via NAudio) --------------------------------
+    ' ---- Record (system audio -> wav, via NAudio's WASAPI loopback capture) -----
+    ' Loopback taps whatever the default output device is actually playing - this app's own
+    ' tape playback, another app, anything mixed by Windows - rather than a microphone, so
+    ' unlike the old mic-recording behavior, playback is deliberately left running instead of
+    ' being stopped when Record is pressed: stopping it would defeat "record what's playing".
 
     Private Sub RecordButton_Click(sender As Object, e As RoutedEventArgs)
         If isRecording Then
@@ -845,28 +849,30 @@ Class Cassette
 
     Private Sub StartRecording()
         Try
-            StopPlayback()
             sfx.Play("record_clunk.wav")
 
             Dim fileName = $"Recording_{DateTime.Now:yyyyMMdd_HHmmss}.wav"
             recordingPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)
 
-            micInput = New WaveIn With {.WaveFormat = New WaveFormat(44100, 1)}
-            waveWriter = New WaveFileWriter(recordingPath, micInput.WaveFormat)
-            AddHandler micInput.DataAvailable, AddressOf WaveIn_DataAvailable
-            AddHandler micInput.RecordingStopped, AddressOf WaveIn_RecordingStopped
-            micInput.StartRecording()
+            loopbackCapture = New WasapiLoopbackCapture()
+            ' The loopback format (sample rate/channels/bit depth) is fixed by the system's
+            ' current output mix format, not something we get to choose - read it back rather
+            ' than assuming 44.1kHz mono the way the old mic setup did.
+            waveWriter = New WaveFileWriter(recordingPath, loopbackCapture.WaveFormat)
+            AddHandler loopbackCapture.DataAvailable, AddressOf LoopbackCapture_DataAvailable
+            AddHandler loopbackCapture.RecordingStopped, AddressOf LoopbackCapture_RecordingStopped
+            loopbackCapture.StartRecording()
 
             isRecording = True
             RecordButton.Content = "⏹"
-            StatusText.Text = "Recording..."
+            StatusText.Text = "Recording system audio..."
             SpinWheels()
         Catch ex As Exception
             StatusText.Text = "Recording failed: " & ex.Message
         End Try
     End Sub
 
-    Private Sub WaveIn_DataAvailable(sender As Object, e As WaveInEventArgs)
+    Private Sub LoopbackCapture_DataAvailable(sender As Object, e As WaveInEventArgs)
         waveWriter?.Write(e.Buffer, 0, e.BytesRecorded)
         ' Patches the RIFF/data chunk sizes in the header now rather than waiting for Dispose(),
         ' so the file on disk is always a valid, playable WAV even if the app is closed or
@@ -876,20 +882,22 @@ Class Cassette
 
     Private Sub StopRecording()
         sfx.Play("release.wav")
-        micInput?.StopRecording()
+        loopbackCapture?.StopRecording()
     End Sub
 
-    Private Sub WaveIn_RecordingStopped(sender As Object, e As StoppedEventArgs)
+    Private Sub LoopbackCapture_RecordingStopped(sender As Object, e As StoppedEventArgs)
         waveWriter?.Dispose()
         waveWriter = Nothing
-        micInput?.Dispose()
-        micInput = Nothing
+        loopbackCapture?.Dispose()
+        loopbackCapture = Nothing
         isRecording = False
 
         Dispatcher.Invoke(Sub()
                               RecordButton.Content = "⏺"
                               StatusText.Text = "Saved: " & Path.GetFileName(recordingPath)
-                              StopWheels()
+                              ' Recording no longer force-stops playback, so only freeze the wheels
+                              ' here if a song isn't the reason they're still turning.
+                              If Not positionTimer.IsEnabled Then StopWheels()
                               LoadPlaylist()
                           End Sub)
     End Sub

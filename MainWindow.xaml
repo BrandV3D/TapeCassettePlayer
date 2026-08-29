@@ -4,10 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Tape_Player"
-        xmlns:xcad="https://github.com/Dirkster99/AvalonDock"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         mc:Ignorable="d"
-        Title="Tape Cassette Player" Height="820" Width="1660" MinWidth="640" MinHeight="420"
+        Title="Tape Cassette Player" Height="800" Width="1180" MinWidth="820" MinHeight="560"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None" ResizeMode="CanResize" AllowsTransparency="False"
         Background="{DynamicResource Bg0Brush}"
@@ -66,6 +65,68 @@
             <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
             <Setter Property="StrokeThickness" Value="1.1"/>
             <Setter Property="SnapsToDevicePixels" Value="True"/>
+        </Style>
+
+        <!-- Flat, underline-selected tabs for the right-hand panel - deliberately not the default
+             WPF tab chrome (raised 3D folder tabs), which would look dated next to everything else
+             here. Closer to the flat text-tab pattern most streaming apps use for secondary views. -->
+        <Style TargetType="TabPanel">
+            <Setter Property="Background" Value="{DynamicResource Bg0Brush}"/>
+        </Style>
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="12,12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="3"/>
+                            </Grid.RowDefinitions>
+                            <ContentPresenter x:Name="Header" ContentSource="Header" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            <Rectangle x:Name="Indicator" Grid.Row="1" Fill="{DynamicResource AccentGradientBrush}" Opacity="0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Indicator" Property="Opacity" Value="1"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Drag handles between regions - a hairline at rest, lit up in the accent color under the
+             cursor/while dragging so it's obvious it's grabbable, same idea as a real mixer's panel
+             seams. -->
+        <Style x:Key="VerticalSplitter" TargetType="GridSplitter">
+            <Setter Property="Background" Value="{DynamicResource HairlineBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="SizeWE"/>
+            <Setter Property="ResizeBehavior" Value="PreviousAndNext"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AccentStartBrush}"/>
+                </Trigger>
+                <Trigger Property="IsDragging" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AccentStartBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="HorizontalSplitter" TargetType="GridSplitter" BasedOn="{StaticResource VerticalSplitter}">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="Cursor" Value="SizeNS"/>
+            <Setter Property="ResizeDirection" Value="Rows"/>
         </Style>
 
     </Window.Resources>
@@ -128,95 +189,105 @@
             </Grid>
         </Border>
 
-        <xcad:DockingManager Grid.Row="1" x:Name="Dock" AllowMixedOrientation="True" BorderBrush="#FF3A3A3A" BorderThickness="1">
-            <!-- Deliberate three-column arrangement, not a flat grid of equal boxes: the tape deck
-                 is the visual center of the app, so Cassette anchors the middle column with its own
-                 transport Controls stacked directly underneath it - the pairing you'd expect on an
-                 actual deck. The left column pairs the live Spectrum readout with the Graphic
-                 Equalizer that's shaping it; the right column mirrors that same "meter over its
-                 controls" idea with Album Art over the Visualizer. Playlist spans the full width
-                 along the bottom, since a track list reads better wide than boxed into a column. -->
-            <xcad:LayoutRoot>
-                <xcad:LayoutPanel Orientation="Vertical">
-                    <xcad:LayoutPanel Orientation="Horizontal" DockHeight="620">
+        <!-- One fixed, non-dockable layout instead of freely-arrangeable panes - the shape most
+             music players actually use: a now-playing centerpiece with its own transport bar
+             directly underneath (the deck-and-its-own-controls pairing you'd expect on an actual
+             machine), the live Spectrum equalizer with the Playlist underneath it, and a tab strip
+             for the panels that aren't part of the everyday play/pause loop. Album Art always lives
+             in its own separate window (see MainWindow.xaml.vb) rather than a column here. -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="320"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="300" MinWidth="240" MaxWidth="460"/>
+                <ColumnDefinition Width="6"/>
+                <ColumnDefinition Width="340" MinWidth="260" MaxWidth="560"/>
+            </Grid.ColumnDefinitions>
 
-                        <!-- Left column: Spectrum meter over the Graphic Equalizer that drives it -->
-                        <xcad:LayoutPanel Orientation="Vertical" DockWidth="380">
-                            <xcad:LayoutAnchorablePane DockHeight="300">
-                                <xcad:LayoutAnchorable x:Name="EqualizerPane" Title="Spectrum" CanClose="False" CanFloat="True"
-                                                        FloatingWidth="460" FloatingHeight="260"/>
-                            </xcad:LayoutAnchorablePane>
-                            <xcad:LayoutAnchorablePane DockHeight="320">
-                                <xcad:LayoutAnchorable x:Name="EqualizerControlsPane" Title="Graphic Equalizer" CanClose="False" CanFloat="True"
-                                                        FloatingWidth="660" FloatingHeight="360"/>
-                            </xcad:LayoutAnchorablePane>
-                        </xcad:LayoutPanel>
+            <!-- Center: the cassette itself, with its own transport Controls directly underneath -
+                 a nested Grid so that split stays scoped to just this column. -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="220"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="140" MinHeight="90" MaxHeight="260"/>
+                </Grid.RowDefinitions>
 
-                        <!-- Center column: the cassette itself, transport Controls right underneath -->
-                        <xcad:LayoutPanel Orientation="Vertical" DockWidth="580">
-                            <xcad:LayoutAnchorablePane DockHeight="440">
-                                <xcad:LayoutAnchorable x:Name="CassettePane" Title="Cassette" CanClose="False" CanFloat="True"
-                                                        FloatingWidth="770" FloatingHeight="450"/>
-                            </xcad:LayoutAnchorablePane>
-                            <xcad:LayoutAnchorablePane DockHeight="180">
-                                <xcad:LayoutAnchorable x:Name="ControlsPane" Title="Controls" CanClose="False" CanFloat="True"
-                                                        FloatingWidth="620" FloatingHeight="220"/>
-                            </xcad:LayoutAnchorablePane>
-                        </xcad:LayoutPanel>
+                <Border Grid.Row="0" Background="{DynamicResource Bg0Brush}"
+                        BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1,0">
+                    <ContentControl x:Name="CassetteHost" Margin="16"/>
+                </Border>
 
-                        <!-- Right column: Album Art over the Visualizer, mirroring the left column -->
-                        <xcad:LayoutPanel Orientation="Vertical" DockWidth="380">
-                            <xcad:LayoutAnchorablePane DockHeight="340">
-                                <xcad:LayoutAnchorable x:Name="AlbumArtPane" Title="Album Art" CanClose="False" CanFloat="True"
-                                                        FloatingWidth="300" FloatingHeight="330"/>
-                            </xcad:LayoutAnchorablePane>
-                            <xcad:LayoutAnchorablePane DockHeight="280">
-                                <xcad:LayoutAnchorable x:Name="VisualizerPane" Title="Visualizer" CanClose="False" CanFloat="True"
-                                                        FloatingWidth="460" FloatingHeight="220"/>
-                            </xcad:LayoutAnchorablePane>
-                        </xcad:LayoutPanel>
+                <GridSplitter Grid.Row="1" Style="{StaticResource HorizontalSplitter}"/>
 
-                        <!-- Extras bay: Theme + the eight purely-cosmetic panels, grouped into three
-                             tabbed panes so they don't crowd out the functional columns by default.
-                             Every one of them is CanClose="True" (unlike the seven panels above) -
-                             they're optional decoration, meant to be dragged out, resized, tabbed
-                             differently, or closed entirely as the user builds their own layout. -->
-                        <xcad:LayoutPanel Orientation="Vertical" DockWidth="300">
-                            <xcad:LayoutAnchorablePane DockHeight="210">
-                                <xcad:LayoutAnchorable x:Name="ThemePane" Title="Theme" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="360" FloatingHeight="260"/>
-                                <xcad:LayoutAnchorable x:Name="CreditsPane" Title="Credits" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="320" FloatingHeight="260"/>
-                                <xcad:LayoutAnchorable x:Name="LinerNotesPane" Title="Liner Notes" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="320" FloatingHeight="300"/>
-                            </xcad:LayoutAnchorablePane>
-                            <xcad:LayoutAnchorablePane DockHeight="200">
-                                <xcad:LayoutAnchorable x:Name="VuMetersPane" Title="VU Meters" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="360" FloatingHeight="220"/>
-                                <xcad:LayoutAnchorable x:Name="TapeCounterPane" Title="Tape Counter" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="320" FloatingHeight="220"/>
-                            </xcad:LayoutAnchorablePane>
-                            <xcad:LayoutAnchorablePane DockHeight="210">
-                                <xcad:LayoutAnchorable x:Name="StickersPane" Title="Stickers" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="320" FloatingHeight="260"/>
-                                <xcad:LayoutAnchorable x:Name="ConcertPosterPane" Title="Live on Tape" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="300" FloatingHeight="320"/>
-                                <xcad:LayoutAnchorable x:Name="RetroAdPane" Title="Retro Ad" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="340" FloatingHeight="320"/>
-                                <xcad:LayoutAnchorable x:Name="StaticNoisePane" Title="Static" CanClose="True" CanFloat="True"
-                                                        FloatingWidth="360" FloatingHeight="220"/>
-                            </xcad:LayoutAnchorablePane>
-                        </xcad:LayoutPanel>
+                <Border Grid.Row="2" Background="{DynamicResource Bg0Brush}"
+                        BorderBrush="{DynamicResource HairlineBrush}" BorderThickness="1,1,1,0">
+                    <ContentControl x:Name="ControlsHost"/>
+                </Border>
+            </Grid>
 
-                    </xcad:LayoutPanel>
+            <!-- Drag handles between every region - the layout itself is fixed (no floating/docking
+                 anymore, see the redesign note above), but every split here is still resizable. -->
+            <GridSplitter Grid.Column="1" Style="{StaticResource VerticalSplitter}"/>
 
-                    <!-- Footer: Playlist, full width -->
-                    <xcad:LayoutAnchorablePane DockHeight="180">
-                        <xcad:LayoutAnchorable x:Name="PlaylistPane" Title="Playlist" CanClose="False" CanFloat="True"
-                                                FloatingWidth="500" FloatingHeight="220"/>
-                    </xcad:LayoutAnchorablePane>
-                </xcad:LayoutPanel>
-            </xcad:LayoutRoot>
-        </xcad:DockingManager>
+            <!-- Spectrum equalizer with the Playlist underneath it - a nested Grid so that split
+                 stays scoped to just this column. -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" MinHeight="160"/>
+                    <RowDefinition Height="6"/>
+                    <RowDefinition Height="220" MinHeight="120" MaxHeight="420"/>
+                </Grid.RowDefinitions>
+
+                <ContentControl x:Name="EqualizerHost" Grid.Row="0"/>
+
+                <GridSplitter Grid.Row="1" Style="{StaticResource HorizontalSplitter}"/>
+
+                <DockPanel Grid.Row="2" Background="{DynamicResource Bg1Brush}" LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" Text="PLAYLIST" FontSize="11" FontWeight="Bold"
+                               Foreground="{DynamicResource TextSecondaryBrush}" Margin="14,12,14,6"/>
+                    <ContentControl x:Name="PlaylistHost"/>
+                </DockPanel>
+            </Grid>
+
+            <GridSplitter Grid.Column="3" Style="{StaticResource VerticalSplitter}"/>
+
+            <!-- Right: a tab strip for everything that isn't part of the everyday play/pause loop. -->
+            <TabControl Grid.Column="4" Background="{DynamicResource Bg1Brush}" BorderThickness="0">
+                <TabItem Header="EQUALIZER">
+                    <Grid Background="{DynamicResource Bg1Brush}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1.3*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <ContentControl x:Name="EqualizerControlsHost" Grid.Row="0"/>
+                        <ContentControl x:Name="VuMetersHost" Grid.Row="1"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="SCOPE">
+                    <Grid Background="{DynamicResource Bg1Brush}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="0.8*"/>
+                        </Grid.RowDefinitions>
+                        <ContentControl x:Name="VisualizerHost" Grid.Row="0"/>
+                        <ContentControl x:Name="TapeCounterHost" Grid.Row="1"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="STYLE">
+                    <ScrollViewer Background="{DynamicResource Bg1Brush}" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <ContentControl x:Name="ThemeHost" Height="220"/>
+                            <ContentControl x:Name="CreditsHost" Height="200"/>
+                            <ContentControl x:Name="StickersHost" Height="220"/>
+                            <ContentControl x:Name="LinerNotesHost" Height="260"/>
+                            <ContentControl x:Name="ConcertPosterHost" Height="260"/>
+                            <ContentControl x:Name="RetroAdHost" Height="280"/>
+                            <ContentControl x:Name="StaticNoiseHost" Height="200"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Grid>
     </Grid>
 </Window>

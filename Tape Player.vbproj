@@ -80,7 +80,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dirkster.AvalonDock" Version="5.0.0" />
     <PackageReference Include="NAudio" Version="3.0.1" />
   </ItemGroup>
 
