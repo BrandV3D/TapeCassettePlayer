@@ -22,7 +22,7 @@
             </Grid.ColumnDefinitions>
             <Image x:Name="background" Grid.ColumnSpan="4" Margin="-13,3,-52,-40" Stretch="Fill" Grid.RowSpan="2" Source="/Tape207.png"/>
             <Image Grid.Column="2" Grid.ColumnSpan="2" Margin="2,71,306,220" Grid.Row="1" Source="/BlockM2.png" Stretch="Fill"/>
-            <Image x:Name="StretchSongItem" Margin="102,73,324,218" Stretch="Fill" Source="/NewFilmTapeBailBrown.png" RenderTransformOrigin="1,0.5" Grid.Column="3" Grid.Row="1">
+            <Image x:Name="StretchSongItem" Margin="105,73,321,218" Stretch="Fill" Source="/NewFilmTapeBailBrown.png" RenderTransformOrigin="1,0.5" Grid.Column="3" Grid.Row="1">
                 <Image.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform x:Name="StretchScaleTransform"/>
@@ -32,20 +32,23 @@
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
-            <!-- Side B's counterpart to StretchSongItem: anchored at its LEFT edge (instead of the
-                 right) so it grows rightward, near left_wheel instead of right_wheel - the mirror
-                 image of Side A's tape-stretch visual. Shown only while a Side B track is playing. -->
-            <Image x:Name="StretchSongItemSideB" Visibility="Collapsed" Margin="198,73,6,218" Stretch="Fill" Source="/NewFilmTapeBailBrown.png" RenderTransformOrigin="0,0.5" Grid.Column="1" Grid.Row="1">
+            <!-- Side B's counterpart to StretchSongItem: same right-anchored origin, but its
+                 ScaleTransform starts at -1 instead of +1, so as it animates further negative
+                 (down to -10) it mirrors AND grows toward increasing x - the flipped equivalent
+                 of Side A's tape-stretch visual, from the same anchoring convention. Shown only
+                 while a Side B track is playing. Declared (and left, with no Panel.ZIndex override)
+                 before "center" so it renders BEHIND it, tucked under the hub artwork like Side A. -->
+            <Image x:Name="StretchSongItem_Copy" Visibility="Collapsed" Margin="4,73,38,218" Stretch="Fill" Source="/NewFilmTapeBailBrown.png" RenderTransformOrigin="1,0.5" Grid.Column="2" Grid.Row="1">
                 <Image.RenderTransform>
                     <TransformGroup>
-                        <ScaleTransform x:Name="StretchScaleTransformSideB"/>
+                        <ScaleTransform x:Name="StretchScaleTransform1" ScaleX="-1"/>
                         <SkewTransform/>
                         <RotateTransform Angle="0"/>
                         <TranslateTransform/>
                     </TransformGroup>
                 </Image.RenderTransform>
             </Image>
-            <Image x:Name="center" Grid.ColumnSpan="2" Margin="2,64,306,203" Source="/New Project (1).png" Stretch="Fill" Grid.Row="1" Grid.Column="2"/>
+            <Image x:Name="center" Grid.ColumnSpan="3" Margin="197,64,295,203" Source="/New Project (1).png" Stretch="Fill" Grid.Row="1" Grid.Column="1"/>
             <Image x:Name="right_wheel" Margin="158,63,179,199" Source="/WHEELSMALLFINALBULB.png" Stretch="Fill" RenderTransformOrigin="0.5,0.5" Grid.Column="3" Grid.Row="1" Width="100" Height="100">
                 <Image.RenderTransform>
                     <TransformGroup>

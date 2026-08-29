@@ -48,14 +48,21 @@ Class Cassette
     Private ReadOnly AudioExtensions As String() = {"*.mp3", "*.wav", "*.flac"}
 
     ' Flip Tape: Side A is whatever's normally playing; Side B is a second track, flipped to the
-    ' other side visually (StretchSongItemSideB instead of StretchSongItem). sideATrackPath
+    ' other side visually (StretchSongItem_Copy instead of StretchSongItem). sideATrackPath
     ' remembers Side A's track so flipping back resumes it instead of starting over from scratch.
     Private isSideB As Boolean
     Private sideATrackPath As String
 
-    ' Points at whichever of StretchScaleTransform/StretchScaleTransformSideB is currently active,
-    ' so the stretch-animation code below doesn't need to know which side is showing.
+    ' Points at whichever of StretchScaleTransform/StretchScaleTransform1 is currently active, so
+    ' the stretch-animation code below doesn't need to know which side is showing. Side A's scale
+    ' runs +1 to +10; Side B's element starts at ScaleX=-1 in XAML and mirrors as it grows, so it
+    ' needs the same animation driven -1 to -10 instead - currentStretchSign (+1/-1) is multiplied
+    ' into every value the animation code computes so one set of methods covers both.
     Private currentStretchTransform As ScaleTransform
+    Private currentStretchSign As Double = 1
+
+    ' Mechanical deck sound effects (button clunks, eject/insert, rewind/FF motor whir).
+    Private ReadOnly sfx As New SfxPlayer()
 
     ' The tape visual (this window), the transport controls, and the playlist are three
     ' independent, freely movable/resizable windows; Cassette owns the other two and holds
@@ -224,6 +231,7 @@ Class Cassette
 
     Private Sub SwitchTapeButton_Click(sender As Object, e As RoutedEventArgs)
         If cassetteImagePaths.Count = 0 Then Return
+        sfx.Play("eject.wav")
         cassetteImageIndex = (cassetteImageIndex + 1) Mod cassetteImagePaths.Count
         ApplyCassetteImage()
     End Sub
@@ -232,9 +240,10 @@ Class Cassette
 
     ''' <summary>Flips the tape over: Side A is whatever was already playing (remembered so
     ''' flipping back resumes it); Side B is the next track in the playlist. Either way, swaps
-    ''' which of StretchSongItem/StretchSongItemSideB is showing to match.</summary>
+    ''' which of StretchSongItem/StretchSongItem_Copy is showing to match.</summary>
     Private Sub FlipTapeButton_Click(sender As Object, e As RoutedEventArgs)
         If isSideB Then
+            sfx.Play("insert.wav")
             SetTapeSide(sideB:=False)
             If Not String.IsNullOrEmpty(sideATrackPath) Then PlaySong(sideATrackPath)
         Else
@@ -243,6 +252,7 @@ Class Cassette
                 Return
             End If
 
+            sfx.Play("insert.wav")
             sideATrackPath = songPlaying
             SetTapeSide(sideB:=True)
             AdvancePlaylist(1)
@@ -254,8 +264,9 @@ Class Cassette
     Private Sub SetTapeSide(sideB As Boolean)
         isSideB = sideB
         StretchSongItem.Visibility = If(sideB, Visibility.Collapsed, Visibility.Visible)
-        StretchSongItemSideB.Visibility = If(sideB, Visibility.Visible, Visibility.Collapsed)
-        currentStretchTransform = If(sideB, StretchScaleTransformSideB, StretchScaleTransform)
+        StretchSongItem_Copy.Visibility = If(sideB, Visibility.Visible, Visibility.Collapsed)
+        currentStretchTransform = If(sideB, StretchScaleTransform1, StretchScaleTransform)
+        currentStretchSign = If(sideB, -1, 1)
         controlsWindow.FlipTapeButton.ToolTip = If(sideB, "Flip to Side A", "Flip to Side B")
         ResetStretch()
     End Sub
@@ -377,6 +388,7 @@ Class Cassette
     End Sub
 
     Private Sub PlayButton_Click(sender As Object, e As RoutedEventArgs)
+        sfx.Play("clunk.wav")
         Dim selected = TryCast(PlaylistBox.SelectedItem, ListBoxItem)
         Dim songPath = If(selected IsNot Nothing,
                           CStr(selected.Tag),
@@ -385,14 +397,17 @@ Class Cassette
     End Sub
 
     Private Sub StopButton_Click(sender As Object, e As RoutedEventArgs)
+        sfx.Play("release.wav")
         StopPlayback()
     End Sub
 
     Private Sub PreviousButton_Click(sender As Object, e As RoutedEventArgs)
+        sfx.Play("click.wav")
         AdvancePlaylist(-1)
     End Sub
 
     Private Sub NextButton_Click(sender As Object, e As RoutedEventArgs)
+        sfx.Play("click.wav")
         AdvancePlaylist(1)
     End Sub
 
@@ -415,6 +430,7 @@ Class Cassette
     Private Sub StopPlayback()
         isSeeking = False
         seekTimer.Stop()
+        sfx.StopLoop()
         positionTimer.Stop()
         AudioPlayer.SpeedRatio = 1
         AudioPlayer.Stop()
@@ -509,7 +525,9 @@ Class Cassette
         SpinWheels()
         If songLength > TimeSpan.Zero Then
             Dim remaining = songLength - AudioPlayer.Position
-            AnimateStretch(currentStretchTransform.ScaleX, remaining)
+            ' currentStretchTransform.ScaleX is the signed value (negative on Side B); AnimateStretch
+            ' wants the unsigned magnitude and applies currentStretchSign itself, so undo the sign here.
+            AnimateStretch(currentStretchTransform.ScaleX * currentStretchSign, remaining)
             AnimateLines(LinesScaleTransform.ScaleY, remaining)
             AnimateCenterWindow(CenterWindowCopyTranslateTransform.X, remaining)
         End If
@@ -521,14 +539,17 @@ Class Cassette
         target.SetValue(prop, current)
     End Sub
 
-    ''' <summary>Grows the active side's stretch item (StretchSongItem or StretchSongItemSideB,
-    ''' per <see cref="currentStretchTransform"/>) from <paramref name="fromScale"/> to 10x size,
-    ''' anchored at its outer edge so it stretches inward, over <paramref name="duration"/>.</summary>
+    ''' <summary>Grows the active side's stretch item (StretchSongItem or StretchSongItem_Copy,
+    ''' per <see cref="currentStretchTransform"/>) from <paramref name="fromScale"/> to 10x
+    ''' magnitude, anchored at its outer edge so it stretches inward, over <paramref name="duration"/>.
+    ''' <paramref name="fromScale"/> is always an unsigned magnitude (1 to 10); currentStretchSign
+    ''' is applied here so Side B's element (which mirrors via a negative ScaleX) animates -1 to
+    ''' -10 while Side A's animates +1 to +10, using the same call site.</summary>
     Private Sub AnimateStretch(fromScale As Double, duration As TimeSpan)
         If duration <= TimeSpan.Zero Then Return
         Dim anim As New DoubleAnimation With {
-            .From = fromScale,
-            .To = 10,
+            .From = fromScale * currentStretchSign,
+            .To = 10 * currentStretchSign,
             .Duration = New Duration(duration)
         }
         currentStretchTransform.BeginAnimation(ScaleTransform.ScaleXProperty, anim)
@@ -536,7 +557,7 @@ Class Cassette
 
     Private Sub ResetStretch()
         currentStretchTransform.BeginAnimation(ScaleTransform.ScaleXProperty, Nothing)
-        currentStretchTransform.ScaleX = 1
+        currentStretchTransform.ScaleX = 1 * currentStretchSign
     End Sub
 
     ''' <summary>Sets the active side's stretch item scale directly from <paramref name="position"/>
@@ -547,7 +568,7 @@ Class Cassette
         Dim progress = position.TotalSeconds / songLength.TotalSeconds
         progress = Math.Max(0, Math.Min(1, progress))
         currentStretchTransform.BeginAnimation(ScaleTransform.ScaleXProperty, Nothing)
-        currentStretchTransform.ScaleX = 1 + progress * 9
+        currentStretchTransform.ScaleX = (1 + progress * 9) * currentStretchSign
     End Sub
 
     ''' <summary>Shrinks Lines from <paramref name="fromScale"/> down to half its height and back to full
@@ -611,6 +632,7 @@ Class Cassette
         seekDirection = direction
         isSeeking = True
         source.CaptureMouse()
+        sfx.StartLoop("seek_whir.wav")
         AudioPlayer.SpeedRatio = SeekAudioSpeedRatio
         AudioPlayer.Play()
         SpinWheelsSeeking(seekDirection)
@@ -630,6 +652,7 @@ Class Cassette
 
     Private Sub EndSeeking(source As UIElement)
         source?.ReleaseMouseCapture()
+        sfx.StopLoop()
         If Not isSeeking Then Return
         isSeeking = False
         seekTimer.Stop()
@@ -672,6 +695,7 @@ Class Cassette
     Private Sub StartRecording()
         Try
             StopPlayback()
+            sfx.Play("record_clunk.wav")
 
             Dim fileName = $"Recording_{DateTime.Now:yyyyMMdd_HHmmss}.wav"
             recordingPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName)
@@ -700,11 +724,13 @@ Class Cassette
     End Sub
 
     Private Sub StopRecording()
+        sfx.Play("release.wav")
         micInput?.StopRecording()
     End Sub
 
     Private Sub Cassette_Closing(sender As Object, e As CancelEventArgs)
         If isRecording Then StopRecording()
+        sfx.StopLoop()
     End Sub
 
     Private Sub WaveIn_RecordingStopped(sender As Object, e As StoppedEventArgs)
