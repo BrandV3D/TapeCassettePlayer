@@ -47,3 +47,9 @@
 *.tmp filter=lfs diff=lfs merge=lfs -text
 
 *.xml filter=lfs diff=lfs merge=lfs -text
+
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+
+*.mixtape filter=lfs diff=lfs merge=lfs -text
+
+*.xaml filter=lfs diff=lfs merge=lfs -text
